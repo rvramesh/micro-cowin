@@ -1,6 +1,7 @@
 import { lazy } from 'react';
 import { BrowserRouter as Router, Switch, Route, Redirect } from 'react-router-dom'
 import AccessibleNavigationAnnouncer from './components/AccessibleNavigationAnnouncer'
+import Header from './components/Header';
 
 const Layout = lazy(() => import('./containers/Layout'))
 const Login = lazy(() => import('./pages/Login'))
@@ -11,6 +12,7 @@ function App() {
   return (
     <>
       <Router>
+        <Header />
         <AccessibleNavigationAnnouncer />
         <Switch>
           <Route path="/login" component={Login} />
@@ -24,7 +26,7 @@ function App() {
         </Switch>
       </Router>
     </>
-  )
+  );
 }
 
 export default App

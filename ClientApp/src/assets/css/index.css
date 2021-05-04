@@ -1,0 +1,6 @@
+@tailwind base;
+@tailwind utilities;
+
+.border-t-blue-500 {
+    border-top-color: #7C3AED;
+}

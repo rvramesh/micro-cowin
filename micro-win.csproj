@@ -7,7 +7,7 @@
     <IsPackable>false</IsPackable>
     <SpaRoot>ClientApp\</SpaRoot>
     <DefaultItemExcludes>$(DefaultItemExcludes);$(SpaRoot)node_modules\**</DefaultItemExcludes>
-    <RootNamespace>micro_win</RootNamespace>
+    <RootNamespace>MicroWin</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>

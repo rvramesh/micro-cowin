@@ -5,8 +5,11 @@ using Microsoft.AspNetCore.SpaServices.ReactDevelopmentServer;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using MicroWin.Authorization;
+using MicroWin.Common;
+using MicroWin.Configuration;
 
-namespace micro_win
+namespace MicroWin
 {
     public class Startup
     {
@@ -20,8 +23,13 @@ namespace micro_win
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            DotEnv.Load();
 
-            services.AddControllersWithViews();
+            services.AddControllers();
+
+            services.AddSingleton<ApplicationConfigurationProperties>();
+            services.AddSingleton<TelegramTokenValidator>((serviceProvider) => new TelegramTokenValidator(System.Environment.GetEnvironmentVariable("BOT_TOKEN")));
+            services.AddSingleton<AdminUserNamesProvider>((serviceProvider)=>new AdminUserNamesProvider(System.Environment.GetEnvironmentVariable("ADMIN_USERNAMES_PIPE_SEPERATED").Split("|")));
 
             // In production, the React files will be served from this directory
             services.AddSpaStaticFiles(configuration =>

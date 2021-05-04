@@ -1,79 +1,99 @@
-import { Link } from 'react-router-dom'
+import { Link } from "react-router-dom";
 
-import ImageLight from '../assets/img/login-office.jpeg'
-import ImageDark from '../assets/img/login-office-dark.jpeg'
-import { GithubIcon, TwitterIcon } from '../icons'
-import { Label, Input, Button } from '@windmill/react-ui'
+import ImageLight from "../assets/img/login-office.jpeg";
+import ImageDark from "../assets/img/login-office-dark.jpeg";
+import { GithubIcon, TwitterIcon } from "../icons";
+import { Label, Input, Button } from "@windmill/react-ui";
+import { useContext } from "react";
+import { useApplicationContext } from "../context/ApplicationContext";
+import TelegramLoginButton from "../components/TelegramLoginButton";
+import { useAuthContext } from "../context/UserContext";
 
 function Login() {
-  return (
-    <div className="flex items-center min-h-screen p-6 bg-gray-50 dark:bg-gray-900">
-      <div className="flex-1 h-full max-w-4xl mx-auto overflow-hidden bg-white rounded-lg shadow-xl dark:bg-gray-800">
-        <div className="flex flex-col overflow-y-auto md:flex-row">
-          <div className="h-32 md:h-auto md:w-1/2">
-            <img
-              aria-hidden="true"
-              className="object-cover w-full h-full dark:hidden"
-              src={ImageLight}
-              alt="Office"
-            />
-            <img
-              aria-hidden="true"
-              className="hidden object-cover w-full h-full dark:block"
-              src={ImageDark}
-              alt="Office"
-            />
-          </div>
-          <main className="flex items-center justify-center p-6 sm:p-12 md:w-1/2">
-            <div className="w-full">
-              <h1 className="mb-4 text-xl font-semibold text-gray-700 dark:text-gray-200">Login</h1>
-              <Label>
-                <span>Email</span>
-                <Input className="mt-1" type="email" placeholder="john@doe.com" />
-              </Label>
-
-              <Label className="mt-4">
-                <span>Password</span>
-                <Input className="mt-1" type="password" placeholder="***************" />
-              </Label>
-
-              <Button className="mt-4" block tag="a" href="/app">
-                Log in
-              </Button>
-
-              <hr className="my-8" />
-
-              <Button block layout="outline">
-                <GithubIcon className="w-4 h-4 mr-2" aria-hidden="true" />
-                Github
-              </Button>
-              <Button className="mt-4" block layout="outline">
-                <TwitterIcon className="w-4 h-4 mr-2" aria-hidden="true" />
-                Twitter
-              </Button>
-
-              <p className="mt-4">
-                <Link
-                  className="text-sm font-medium text-purple-600 dark:text-purple-400 hover:underline"
-                  to="/forgot-password"
-                >
-                  Forgot your password?
-                </Link>
+  const {
+    organizingBodyName,
+    organizingBodyMemberName,
+    organizingBodyFaqUrl,
+    sourceUrl,
+  } = useApplicationContext();
+  const authContext = useAuthContext();
+  if (authContext.isAuthenticated) {
+    authContext.logout();
+    return <></>;
+  } else {
+    return (
+      <div className="flex items-center min-h-screen p-6 bg-gray-50 dark:bg-gray-900">
+        <div className="flex-1 h-full max-w-4xl mx-auto overflow-hidden bg-white rounded-lg shadow-xl dark:bg-gray-800">
+          <div className="flex flex-col overflow-y-auto md:flex-row">
+            <div className="h-auto md:w-1/2 p-6 pb-0">
+              <h1 className="mb-4 text-xl font-semibold text-center text-gray-700 dark:text-gray-200">
+                Vaccine Enrollment System
+              </h1>
+              <p className="pb-4 text-gray-700 dark:text-gray-200">
+                This system is for{" "}
+                <b>
+                  exclusive use of {organizingBodyName}{" "}
+                  {organizingBodyMemberName}' vaccination program.
+                </b>{" "}
+                {organizingBodyMemberName} of {organizingBodyMemberName} can
+                express their interest for a vaccine and their convient date.
+                The system will place the users in a queue. As the vaccined
+                become available, based on first expressed interest, first
+                served basis the system will send a notification via Telegram
+                app to inform when they can visit for vaccination.
               </p>
-              <p className="mt-1">
-                <Link
-                  className="text-sm font-medium text-purple-600 dark:text-purple-400 hover:underline"
-                  to="/create-account"
-                >
-                  Create account
-                </Link>
+              <p className="pb-4 text-gray-700 dark:text-gray-200">
+                This is not a replacement for GOI's CoWin system. This helps in
+                managing the tokens for the user and in anticipating the demand
+                to plan for the vaccination drive at a individual center level.
               </p>
+              <p className="pb-4 text-gray-700 dark:text-gray-200">
+                <a
+                  className="font-semibold text-purple-600 dark:text-purple-400 hover:underline"
+                  href={organizingBodyFaqUrl}
+                >
+                  Click here
+                </a>{" "}
+                to read about the FAQ
+              </p>
+              <hr className="m-4" />
+              <p className="pb-4 text-gray-700 dark:text-gray-200">
+                If you are not a {organizingBodyMemberName} of{" "}
+                {organizingBodyMemberName} but is interested in this
+                application, you can visit the source code @{" "}
+                <a
+                  className="font-semibold text-purple-600 dark:text-purple-400 hover:underline"
+                  href={sourceUrl}
+                >
+                  {sourceUrl}
+                </a>
+              </p>
+              <hr className="m-4 md:invisible" />
             </div>
-          </main>
+            <main className="flex items-center justify-center p-6 pt-0 md:w-1/2">
+              <div className="w-full">
+                <h1 className="mb-4 text-center text-xl font-semibold text-gray-700 dark:text-gray-200">
+                  Login
+                </h1>
+                <div className="flex justify-center">
+                  <TelegramLoginButton
+                    botName="ss_microcowin_bot"
+                    dataOnauth={(data) => {
+                     authContext.setTelegramDetails(data);
+                    }}
+                    buttonSize="large"
+                    cornerRadius={4}
+                    requestAccess={true}
+                    usePic={false}
+                  ></TelegramLoginButton>
+                </div>
+              </div>
+            </main>
+          </div>
         </div>
       </div>
-    </div>
-  )
+    );
+  }
 }
 
-export default Login
+export default Login;
