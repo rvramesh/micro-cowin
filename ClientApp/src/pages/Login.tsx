@@ -1,13 +1,8 @@
-import { Link } from "react-router-dom";
+import { useHistory } from "react-router-dom";
 
-import ImageLight from "../assets/img/login-office.jpeg";
-import ImageDark from "../assets/img/login-office-dark.jpeg";
-import { GithubIcon, TwitterIcon } from "../icons";
-import { Label, Input, Button } from "@windmill/react-ui";
-import { useContext } from "react";
 import { useApplicationContext } from "../context/ApplicationContext";
 import TelegramLoginButton from "../components/TelegramLoginButton";
-import { useAuthContext } from "../context/UserContext";
+import { useAuthContext } from "../context/AuthenticationContext";
 
 function Login() {
   const {
@@ -17,30 +12,29 @@ function Login() {
     sourceUrl,
   } = useApplicationContext();
   const authContext = useAuthContext();
+  const history = useHistory();
   if (authContext.isAuthenticated) {
-    authContext.logout();
+    history.push("/app");
     return <></>;
   } else {
     return (
-      <div className="flex items-center min-h-screen p-6 bg-gray-50 dark:bg-gray-900">
-        <div className="flex-1 h-full max-w-4xl mx-auto overflow-hidden bg-white rounded-lg shadow-xl dark:bg-gray-800">
-          <div className="flex flex-col overflow-y-auto md:flex-row">
+    <div className="dark:bg-gray-800">
             <div className="h-auto md:w-1/2 p-6 pb-0">
               <h1 className="mb-4 text-xl font-semibold text-center text-gray-700 dark:text-gray-200">
                 Vaccine Enrollment System
               </h1>
               <p className="pb-4 text-gray-700 dark:text-gray-200">
-                This system is for{" "}
+                This system is{" "}
                 <b>
-                  exclusive use of {organizingBodyName}{" "}
-                  {organizingBodyMemberName}' vaccination program.
+                  exclusive for {organizingBodyMemberName} of{" "}
+                  {organizingBodyName}{" "}
                 </b>{" "}
-                {organizingBodyMemberName} of {organizingBodyMemberName} can
-                express their interest for a vaccine and their convient date.
-                The system will place the users in a queue. As the vaccined
-                become available, based on first expressed interest, first
-                served basis the system will send a notification via Telegram
-                app to inform when they can visit for vaccination.
+                They can express their interest for a vaccine and their convient
+                date. The system will place the users in a queue. As the
+                vaccines become available, a slot will be blocked based on first
+                expressed interest, first served basis and the system will send
+                a notification via Telegram app to inform when they can visit
+                for vaccination.
               </p>
               <p className="pb-4 text-gray-700 dark:text-gray-200">
                 This is not a replacement for GOI's CoWin system. This helps in
@@ -59,8 +53,8 @@ function Login() {
               <hr className="m-4" />
               <p className="pb-4 text-gray-700 dark:text-gray-200">
                 If you are not a {organizingBodyMemberName} of{" "}
-                {organizingBodyMemberName} but is interested in this
-                application, you can visit the source code @{" "}
+                {organizingBodyName} but is interested in this application, you
+                can visit the source code @{" "}
                 <a
                   className="font-semibold text-purple-600 dark:text-purple-400 hover:underline"
                   href={sourceUrl}
@@ -70,7 +64,7 @@ function Login() {
               </p>
               <hr className="m-4 md:invisible" />
             </div>
-            <main className="flex items-center justify-center p-6 pt-0 md:w-1/2">
+            <div className="flex items-center justify-center p-6 pt-0 md:w-1/2">
               <div className="w-full">
                 <h1 className="mb-4 text-center text-xl font-semibold text-gray-700 dark:text-gray-200">
                   Login
@@ -79,7 +73,7 @@ function Login() {
                   <TelegramLoginButton
                     botName="ss_microcowin_bot"
                     dataOnauth={(data) => {
-                     authContext.setTelegramDetails(data);
+                      authContext.setTelegramDetails(data);
                     }}
                     buttonSize="large"
                     cornerRadius={4}
@@ -88,10 +82,10 @@ function Login() {
                   ></TelegramLoginButton>
                 </div>
               </div>
-            </main>
-          </div>
-        </div>
-      </div>
+            </div>
+            </div>
+            
+         
     );
   }
 }

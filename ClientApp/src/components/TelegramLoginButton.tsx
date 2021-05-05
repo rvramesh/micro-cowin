@@ -1,5 +1,5 @@
 import React, { useRef, useEffect } from "react";
-import { TelegramUser } from "../context/UserContext";
+import { TelegramUser } from "../context/AuthenticationContext";
 
 
 

@@ -9,7 +9,7 @@ import {
 } from "@windmill/react-ui";
 import { useContext } from "react";
 import { useApplicationContext } from "../context/ApplicationContext";
-import { useAuthContext } from "../context/UserContext";
+import { useAuthContext } from "../context/AuthenticationContext";
 
 function Header() {
   const { mode, toggleMode } = useContext(WindmillContext);

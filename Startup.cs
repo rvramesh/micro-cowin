@@ -30,7 +30,9 @@ namespace MicroWin
             services.AddSingleton<ApplicationConfigurationProperties>();
             services.AddSingleton<TelegramTokenValidator>((serviceProvider) => new TelegramTokenValidator(System.Environment.GetEnvironmentVariable("BOT_TOKEN")));
             services.AddSingleton<AdminUserNamesProvider>((serviceProvider)=>new AdminUserNamesProvider(System.Environment.GetEnvironmentVariable("ADMIN_USERNAMES_PIPE_SEPERATED").Split("|")));
-
+            services.AddSingleton<AuthJwtTokenHandler>((serviceProvider)=>new AuthJwtTokenHandler(
+                AuthJwtTokenOptions.SecuirtyKey, AuthJwtTokenOptions.Issuer, AuthJwtTokenOptions.Audience)
+            );
             // In production, the React files will be served from this directory
             services.AddSpaStaticFiles(configuration =>
             {

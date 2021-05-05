@@ -9,7 +9,7 @@ import { SidebarProvider } from "./context/SidebarContext";
 import myTheme from "./myTheme";
 import { QueryClient, QueryClientProvider } from "react-query";
 import { ApplicationProvider } from "./context/ApplicationContext";
-import { AuthProvider } from "./context/UserContext";
+import { AuthProvider } from "./context/AuthenticationContext";
 
 const queryClient = new QueryClient();
 
