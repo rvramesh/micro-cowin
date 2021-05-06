@@ -12,6 +12,8 @@ namespace MicroWin.Configuration
             this.SourceUrl = Environment.GetEnvironmentVariable("SOURCE_URL");
             this.IdentifierName = Environment.GetEnvironmentVariable("IDENTIFIER_NAME");
             this.IdentifierValues = Environment.GetEnvironmentVariable("IDENTIFIER_VALUES");
+            this.MinYear = Convert.ToInt32(Environment.GetEnvironmentVariable("MIN_YEAR"));
+            this.MaxYear = Convert.ToInt32(Environment.GetEnvironmentVariable("MAX_YEAR"));
         }
         public string OrganizingBodyName { get; init; }
         public string OrganizingBodyMemberName { get; init; }
@@ -19,5 +21,8 @@ namespace MicroWin.Configuration
         public string SourceUrl { get; init; }
         public string IdentifierName { get; init; }
         public string IdentifierValues { get; init; }
+
+        public int MinYear {get;init;}
+        public int MaxYear{get;init;}
     }
 }

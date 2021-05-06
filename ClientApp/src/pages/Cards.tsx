@@ -1,10 +1,7 @@
 import PageTitle from '../components/Typography/PageTitle'
 import SectionTitle from '../components/Typography/SectionTitle'
 import CTA from '../components/CTA'
-import InfoCard from '../components/Cards/InfoCard'
 import { Card, CardBody } from '@windmill/react-ui'
-import { CartIcon, ChatIcon, MoneyIcon, PeopleIcon } from '../icons'
-import RoundIcon from '../components/RoundIcon'
 
 function Cards() {
   return (
@@ -26,7 +23,7 @@ function Cards() {
       <SectionTitle>Responsive cards</SectionTitle>
 
       <div className="grid gap-6 mb-8 md:grid-cols-2 xl:grid-cols-4">
-        <InfoCard title="Total clients" value="6389">
+        {/* <InfoCard title="Total clients" value="6389">
           <RoundIcon
             icon={PeopleIcon}
             iconColorClass="text-orange-500 dark:text-orange-100"
@@ -60,7 +57,7 @@ function Cards() {
             bgColorClass="bg-teal-100 dark:bg-teal-500"
             className="mr-4"
           />
-        </InfoCard>
+        </InfoCard> */}
       </div>
 
       <SectionTitle>Cards with title</SectionTitle>

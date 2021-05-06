@@ -9,14 +9,19 @@ module.exports = windmill({
   ],
   theme: {
     extend: {
+      transitionProperty: {
+        height: "height",
+        variants: {
+          height: ["responsive", "hover", "focus"],
+        },
+      },
       fontFamily: {
         sans: ["Inter", ...defaultTheme.fontFamily.sans],
       },
-       colors: {
+      colors: {
         gray: {
-         
-          '500': '#9e9e9e'
-        }
+          500: "#9e9e9e",
+        },
       },
       boxShadow: {
         bottom:

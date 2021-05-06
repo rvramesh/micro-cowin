@@ -14,12 +14,12 @@ function Login() {
   const authContext = useAuthContext();
   const history = useHistory();
   if (authContext.isAuthenticated) {
-    history.push("/app");
+    history.push("/app/enrollment");
     return <></>;
   } else {
     return (
       <main className="h-full overflow-y-auto p-6">
-        <div className="items-center p-6 bg-gray-50 dark:bg-gray-900">
+        <div className="items-center bg-gray-50 dark:bg-gray-900">
           <div className="flex-1 h-full max-w-4xl mx-auto overflow-hidden bg-white rounded-lg shadow-xl dark:bg-gray-800">
             <div className="flex flex-col overflow-y-auto md:flex-row dark:bg-gray-800">
               <div className="h-auto md:w-1/2 p-6 pb-0">

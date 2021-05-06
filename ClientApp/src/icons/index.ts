@@ -27,6 +27,7 @@ import { ReactComponent as OutlinePersonIcon } from './outlinePerson.svg'
 import { ReactComponent as OutlineCogIcon } from './outlineCog.svg'
 import { ReactComponent as OutlineLogoutIcon } from './outlineLogout.svg'
 import { ReactComponent as LoadingIcon } from "./loading.svg";
+import { ReactComponent as ArrowCircleDown } from "./arrow-circle-down.svg";
 
 export {
   ButtonsIcon,
@@ -57,5 +58,6 @@ export {
   OutlinePersonIcon,
   OutlineCogIcon,
   OutlineLogoutIcon,
-  LoadingIcon
-}
+  LoadingIcon,
+  ArrowCircleDown,
+};

@@ -7,7 +7,6 @@ import {
 } from "react-router-dom";
 import AccessibleNavigationAnnouncer from "./components/AccessibleNavigationAnnouncer";
 import Header from "./components/Header";
-import Main from "./containers/Main";
 import { useAuthContext } from "./context/AuthenticationContext";
 
 const Layout = lazy(() => import("./containers/Layout"));

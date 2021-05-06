@@ -1,6 +1,4 @@
 import { Button, Card, CardBody } from "@windmill/react-ui";
-import React from "react";
-import PageTitle from "../components/Typography/PageTitle";
 
 function SessionTimeout() {
   return (

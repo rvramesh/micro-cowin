@@ -11,6 +11,9 @@ interface ApplicationConfigurationProperties {
   sourceUrl: string;
   identifierName: string;
   identifierValues: string;
+  minYear:number;
+  maxYear:number;
+  vaxines: {id:number, name:string}[]
 }
 const getApplicationConfiguration = async () => {
   const { data } = await axios.get<ApplicationConfigurationProperties>(
@@ -30,15 +33,19 @@ function useApplicationConfiguration() {
   });
 }
 
-const ApplicationContext = createContext<ApplicationConfigurationProperties>(
-  {
+const initialValues = {
     organizingBodyName: "",
     organizingBodyMemberName: "",
     organizingBodyFaqUrl: "",
     sourceUrl: "",
     identifierName: "",
     identifierValues: "",
-  }
+    minYear:(2021-18),
+    maxYear:(2021-110),
+    vaxines:[{id:1, name:"Covaxin"},{id:2, name:"Covishield"}]
+  };
+const ApplicationContext = createContext<ApplicationConfigurationProperties>(
+  initialValues
 );
 
 export const useApplicationContext= ()=>useContext(ApplicationContext);
@@ -68,7 +75,7 @@ export const ApplicationProvider = ({ children }: { children: ReactNode }) => {
     );
   } else {
     return (
-      <ApplicationContext.Provider value={data}>
+      <ApplicationContext.Provider value={{...initialValues, ...data}}>
         {children}
       </ApplicationContext.Provider>
     );
