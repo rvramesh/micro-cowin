@@ -21,13 +21,10 @@ function App() {
     <>
       <Router>
         <AccessibleNavigationAnnouncer />
-        <div className="flex h-screen bg-gray-50 dark:bg-gray-900 false">
+        <div className="flex h-screen bg-gray-50 dark:bg-gray-900 false w-full">
           <div className="flex flex-col flex-1 w-full">
             <Header />
-            <Main>
-              
-                <div className="flex h-screen bg-gray-50 dark:bg-gray-900">
-                  <div className="flex flex-col flex-1 w-full">
+            
                     <Switch>
                       <Route exact path="/login" component={Login} />
                       <Route
@@ -48,10 +45,8 @@ function App() {
                       <Redirect exact from="/" to="/login" />
                       <Route component={Page404} />
                     </Switch>
-                  </div>
-                </div>
-           
-            </Main>
+                
+            
           </div>
         </div>
       </Router>
