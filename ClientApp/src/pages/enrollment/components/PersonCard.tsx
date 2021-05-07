@@ -1,5 +1,6 @@
 import classNames from "classnames";
-import { ArrowCircleDown } from "../../icons";
+import React from "react";
+import { ArrowCircleDown, XCircle } from "../../../icons";
 import EnrollmentForm from "./EnrollmentForm";
 
 export type Person = {
@@ -12,14 +13,18 @@ function PersonCard({
   index,
   isExpanded,
   onClick,
+  onRemove,
   data,
   colorCss,
+  name,
 }: {
   index:number;
   isExpanded: boolean;
   onClick: (index:number)=>void;
+  onRemove?: (index:number)=>void;
   data: Person;
   colorCss:string;
+  name:string;
 }) {
   return (
     <div
@@ -45,7 +50,7 @@ function PersonCard({
             "rotate-180": isExpanded,
           })}
         >
-          <ArrowCircleDown />
+          <XCircle onClick={()=>onRemove?.(index)} />
         </div>
       </div>
 
@@ -56,7 +61,7 @@ function PersonCard({
           "flex relative items-center transition-all overflow-hidden "
         )}
       >
-        <div className="p-4"><EnrollmentForm index={index}></EnrollmentForm></div>
+        <div className="p-4"><EnrollmentForm name={`${name}.${index}`}></EnrollmentForm></div>
       </div>
     </div>
   );

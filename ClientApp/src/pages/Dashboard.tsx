@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 
 import CTA from '../components/CTA'
 import PageTitle from '../components/Typography/PageTitle'
@@ -15,7 +15,6 @@ import {
   Badge,
   Pagination,
 } from '@windmill/react-ui'
-import PersonCard from '../components/Cards/PersonCard';
 
 
 function Dashboard() {
@@ -45,35 +44,7 @@ function Dashboard() {
 
       {/* <!-- Cards --> */}
       <div className="grid mb-8">
-        <PersonCard
-          index={1}
-          isExpanded={false}
-          data={{}}
-          onClick={(num: number) => {}}
-          colorCss="bg-red-600"
-        />
-
-        <PersonCard
-          index={2}
-          isExpanded={true}
-          data={{}}
-          onClick={(num: number) => {}}
-          colorCss="bg-blue-600"
-        />
-        <PersonCard
-          index={3}
-          isExpanded={false}
-          data={{ initials: "RV" }}
-          onClick={(num: number) => {}}
-          colorCss="bg-yellow-600"
-        />
-        <PersonCard
-          index={3}
-          isExpanded={false}
-          data={{ initials: "RV" }}
-          onClick={(num: number) => {}}
-          colorCss="bg-green-600"
-        />
+        
       </div>
 
       <TableContainer>

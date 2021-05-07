@@ -1,0 +1,108 @@
+
+import PageTitle from "../../components/Typography/PageTitle";
+import { FormProvider, useFieldArray, useForm } from "react-hook-form";
+
+import React, { useEffect, useLayoutEffect, useState } from "react";
+import { useAuthContext } from "../../context/AuthenticationContext";
+import { Button } from "@windmill/react-ui";
+import PersonCard, { Person } from "./components/PersonCard";
+
+function useStackableCard() {
+    const [currentActive, setCurrentActive] = useState<number|null>(1);
+   
+    function clickHandler(clickedIndex:number) {
+        if(clickedIndex===currentActive) {
+            setCurrentActive(null);
+        } else {
+            setCurrentActive(clickedIndex);
+        }
+    }
+
+    function register<T>(data:T, index:number){
+            
+            return {
+              index: index,
+              onClick: clickHandler,
+              data: data,
+              isExpanded: true,
+            };
+        }
+    return {
+        register:register
+    }
+}
+const colorNames = ["bg-pink-600", "bg-blue-600", "bg-green-600", "bg-indigo-600","bg-red-600","bg-purple-600","bg-yellow-600","bg-blue-600"];
+
+const pageBottomId = "page-bottom";
+
+
+function Enrollment() {
+  const {register } =useStackableCard();
+  const authContext = useAuthContext();
+  const userName = authContext.isAuthenticated ? authContext.firstName : "";
+  const formMethods = useForm();
+  
+  const { fields, append, prepend, remove, swap, move, insert } = useFieldArray({
+    control:formMethods.control,
+    name: "person",
+    keyName:"id"
+
+  });
+
+  useEffect(()=>{
+    fields.length === 0 && append({});
+  },[append, fields.length]);
+  
+   const onSubmit = (data:unknown) => {
+     console.log(data);
+   };
+
+  return (
+    <>
+      <PageTitle className="mt-0">Hi {userName}!</PageTitle>
+
+      {/* <!-- Cards --> */}
+      <div className="grid mb-8">
+        <form className="form" onSubmit={formMethods.handleSubmit(onSubmit)}>
+          <FormProvider {...formMethods}>
+            {fields.map((item, index) => (
+              <PersonCard
+                {...register<Person>({}, index)}
+                colorCss={colorNames[index % 8]}
+                name={"person"}
+                onRemove={() => {
+                  debugger;
+                  remove(index);
+                }}
+                key={item.id}
+                
+              />
+            ))}
+            <div className="flex justify-between">
+              <Button
+                disabled={fields.length >= 8 ? true : undefined}
+                onClick={() => {
+                  append({});
+                }}
+               
+                className="mr-4 bg-pink-600 border border-transparent active:bg-pink-600 hover:bg-pink-700 focus:shadow-outline-pink"
+               
+              >
+                Add Additional Member
+              </Button>
+              <Button
+                onClick={formMethods.handleSubmit(onSubmit, (error) =>
+                  console.log(error)
+                )}
+              >
+                Submit
+              </Button>
+            </div>
+          </FormProvider>
+        </form>
+      </div>
+    </>
+  );
+}
+
+export default Enrollment;
