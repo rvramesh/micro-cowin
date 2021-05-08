@@ -1,8 +1,8 @@
-import axios from "axios";
+import  axios, { AxiosInstance } from "axios";
 import { createContext, useContext, useEffect, useState } from "react";
 import { ReactNode } from "react";
 import { useHistory } from "react-router";
-
+import authAxios from "./custom-axios";
 export interface TelegramUser {
   id: number;
   first_name: string;
@@ -12,28 +12,23 @@ export interface TelegramUser {
   hash: number;
 }
 
-type LoggedInUser = {
-  firstName: string;
-  lastName: string;
+type LoggedInUser = TelegramUser & {
   roles: string[];
   jwtToken: string;
   isAuthenticated: true;
-  isAdmin:boolean;
+  isAdmin: boolean;
+  hasAcceptedTerms: boolean;
 };
 
 type AnonymousUser = {
   isAuthenticated: false;
 };
 
-type User = LoggedInUser | AnonymousUser;
+type UserContext = LoggedInUser | AnonymousUser;
 
-type LoginUser = AnonymousUser & {
-  setTelegramDetails: (loginDetails: TelegramUser) => void;
-};
-
-type UserContextProperties = (LoggedInUser & {
-  logout:()=>void;
-}) | LoginUser;
+type UserContextProperties =
+  | (LoggedInUser & { refetchToken: () => void; logout: () => void; getAxiosWithToken:()=>AxiosInstance; })
+  | (AnonymousUser & { login: (loginDetails: TelegramUser) => void });
 
 const getAuthorizedUserToken = async (loginDetails: TelegramUser) => {
   const { data } = await axios.post<{
@@ -44,48 +39,85 @@ const getAuthorizedUserToken = async (loginDetails: TelegramUser) => {
   return data;
 };
 
+
+const getUserContextData = async (
+  loginDetails: TelegramUser
+): Promise<UserContext> => {
+  var loginStatus = await getAuthorizedUserToken(loginDetails);
+  if (loginStatus.isAuthenticated) {
+    return {
+      ...loginDetails,
+      isAuthenticated: true,
+      roles: loginStatus.roles,
+      jwtToken: loginStatus.jwtToken,
+      isAdmin: loginStatus.roles.includes("Admin"),
+      hasAcceptedTerms: loginStatus.roles.includes("AcceptedTerms"),
+    };
+  } else {
+    return {
+      isAuthenticated: false,
+    };
+  }
+};
 const AuthContext = createContext<UserContextProperties>({
   isAuthenticated: false,
-  setTelegramDetails: (loginDetails: TelegramUser) => {},
+  login: (loginDetails) => {},
 });
 
-export const useAuthContext=()=>useContext(AuthContext);
+export const useAuthContext = () => useContext(AuthContext);
+
+export const useAuthenticatedContext = () => {
+  var authContext = useContext(AuthContext);
+  if (authContext.isAuthenticated) {
+    return authContext;
+  } else {
+    throw new Error("Not Authenticated");
+  }
+};
+
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const [data, setData] = useState<User>({ isAuthenticated: false });
+  const [data, setData] = useState<UserContext>({
+    isAuthenticated: false,
+  });
   const history = useHistory();
   console.log("History", history);
-  let providerValue;
+  let providerValue: UserContextProperties;
   if (data.isAuthenticated) {
-    providerValue = {...data,logout:()=>{setData({isAuthenticated:false})}};
-  } else {
-    const setTelegramDetails = async (loginDetails: TelegramUser) => {
-      var loginStatus = await getAuthorizedUserToken(loginDetails);
-      if (loginStatus.isAuthenticated) {
-        setData({
-          isAuthenticated: true,
-          firstName: loginDetails.first_name,
-          lastName: loginDetails.last_name,
-          roles: loginStatus.roles,
-          jwtToken: loginStatus.jwtToken,
-          isAdmin:loginStatus.roles.includes("Admin")
-        });
+    providerValue = {
+      ...data,
+      logout: () => {
+        setData({ isAuthenticated: false });
+      },
+      refetchToken: async () => {
+        var loginStatus = await getUserContextData(data);
+        setData(loginStatus);
+      },
+      getAxiosWithToken:() => {
+        return authAxios(data.jwtToken);
       }
     };
-    providerValue = { ...data, setTelegramDetails };
+  } else {
+    providerValue = {
+      ...data,
+      login: async (loginDetails: TelegramUser) => {
+        var loginStatus = await getUserContextData(loginDetails);
+        setData(loginStatus);
+      },
+    };
   }
 
-  useEffect(()=>{
-    if(data.isAuthenticated) {
-      const handle = setTimeout(()=>{
+  useEffect(() => {
+    if (data.isAuthenticated) {
+      const handle = setTimeout(() => {
         setData({ isAuthenticated: false });
         alert("Timed out!");
-      },20*60*1000);
-      return ()=>{
+      }, 20 * 60 * 1000);
+      return () => {
         clearTimeout(handle);
-      }
+      };
     }
-  },[data.isAuthenticated])
+  }, [data.isAuthenticated]);
   return (
     <AuthContext.Provider value={providerValue}>
       {children}

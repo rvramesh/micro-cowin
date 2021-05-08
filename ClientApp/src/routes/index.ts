@@ -57,10 +57,6 @@ const routes = [
   {
     path: '/blank',
     component: Blank,
-  },
-  {
-    path:'/terms',
-    component:Terms
   }
 ]
 

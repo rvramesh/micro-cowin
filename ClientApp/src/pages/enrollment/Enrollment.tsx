@@ -3,7 +3,7 @@ import PageTitle from "../../components/Typography/PageTitle";
 import { FormProvider, useFieldArray, useForm } from "react-hook-form";
 
 import React, { useEffect, useLayoutEffect, useState } from "react";
-import { useAuthContext } from "../../context/AuthenticationContext";
+import { useAuthContext, useAuthenticatedContext } from "../../context/AuthenticationContext";
 import { Button } from "@windmill/react-ui";
 import PersonCard, { Person } from "./components/PersonCard";
 
@@ -38,8 +38,8 @@ const pageBottomId = "page-bottom";
 
 function Enrollment() {
   const {register } =useStackableCard();
-  const authContext = useAuthContext();
-  const userName = authContext.isAuthenticated ? authContext.firstName : "";
+  const authContext = useAuthenticatedContext();
+  const userName =  authContext.first_name;
   const formMethods = useForm();
   
   const { fields, append, prepend, remove, swap, move, insert } = useFieldArray({

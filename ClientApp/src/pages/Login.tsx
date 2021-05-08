@@ -72,7 +72,7 @@ function Login() {
                   <TelegramLoginButton
                     botName="ss_microcowin_bot"
                     dataOnauth={(data) => {
-                      authContext.setTelegramDetails(data);
+                      authContext.login(data);
                     }}
                     buttonSize="large"
                     cornerRadius={4}

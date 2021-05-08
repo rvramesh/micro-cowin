@@ -13,11 +13,15 @@ import {
 } from "@windmill/react-ui";
 
 import { MailIcon } from "../icons";
-import { useAuthContext } from "../context/AuthenticationContext";
+import {
+  useAuthContext,
+  useAuthenticatedContext,
+} from "../context/AuthenticationContext";
 import { useApplicationContext } from "../context/ApplicationContext";
-import React from "react";
-import SelectSearch from "react-select-search";
-import { useHistory } from "react-router";
+import React, { useState } from "react";
+import SelectSearch, { SelectSearchOption } from "react-select-search";
+import { Redirect, useHistory } from "react-router";
+import axios from "axios";
 
 function Terms() {
   const {
@@ -25,15 +29,49 @@ function Terms() {
     organizingBodyMemberName,
     identifierName,
   } = useApplicationContext();
-  const authContext = useAuthContext();
+  const {
+    getAxiosWithToken,
+    first_name: firstName,
+    last_name,
+    username,
+    refetchToken,
+    hasAcceptedTerms,
+  } = useAuthenticatedContext();
   const history = useHistory();
-  const userName = authContext.isAuthenticated ? authContext.firstName : "";
-  return (
+  const [unitId, setUnitId] = useState<string | undefined>();
+
+  const getOptions = (query: string) =>
+    new Promise<SelectSearchOption[]>((resolve, reject) => {
+      getAxiosWithToken()
+        .get<string[]>(`/api/idservice/search?val=${query}`)
+        .then((response) => {
+          resolve(
+            response.data.map((unit: string) => ({
+              value: unit,
+              name: unit,
+            }))
+          );
+        })
+        .catch(reject);
+    });
+
+  const acceptTerms = async () => {
+    await getAxiosWithToken().post("/api/authorization/user/acceptTerms", {
+      unitId: unitId,
+      firstName: firstName,
+      lastName:last_name,
+      userName:username
+    });
+    refetchToken();
+  };
+  return hasAcceptedTerms ? (
+    <Redirect to="/app/enrollment" />
+  ) : (
     <>
       <div className="min-h-screen  bg-gray-50 dark:bg-gray-900">
         <Card className="mb-8 shadow-md w-100">
           <CardBody>
-            <PageTitle>Hi {userName}!</PageTitle>
+            <PageTitle>Hi {firstName}!</PageTitle>
             <p className="pb-4 text-gray-700 dark:text-gray-200">
               Before you proceed, we would like you to understand the below.
             </p>
@@ -46,7 +84,8 @@ function Terms() {
                     {organizingBodyName}{" "}
                   </b>
                   . You will be required to produce <b>{organizingBodyName}</b>{" "}
-                  ID card for vaccination.
+                  ID card for vaccination. If the value selected in this page is
+                  not matching, you will not be allowed for vaccination.
                 </p>
               </li>
               <li>
@@ -91,21 +130,11 @@ function Terms() {
                 <span className="mr-5 pb-2">I am residing at :</span>{" "}
                 <SelectSearch
                   options={[{ value: "ABC", name: "ABC" }]}
-                  getOptions={(query) => {
-                    return new Promise((resolve, reject) => {
-                      fetch(`/unit-search?val=${query}`)
-                        .then((response) => response.json())
-                        .then(({ units }) => {
-                          resolve(
-                            units.map((unit: string) => ({
-                              value: unit,
-                              name: unit,
-                            }))
-                          );
-                        })
-                        .catch(reject);
-                    });
+                  value={unitId}
+                  onChange={(val: any) => {
+                    setUnitId(val);
                   }}
+                  getOptions={(query) => getOptions(query)}
                   search
                   placeholder="Type to filter"
                 />
@@ -114,7 +143,8 @@ function Terms() {
             <div className="pt-10">
               <Button
                 className="sm:w-full md:w-60"
-                onClick={() => history.push("/app/enrollment")}
+                onClick={acceptTerms}
+                disabled={unitId === undefined}
               >
                 I Agree
               </Button>

@@ -1,3 +1,5 @@
+using System.IdentityModel.Tokens.Jwt;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
@@ -5,9 +7,12 @@ using Microsoft.AspNetCore.SpaServices.ReactDevelopmentServer;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.IdentityModel.Tokens;
 using MicroWin.Authorization;
 using MicroWin.Common;
+using MicroWin.Common.Database;
 using MicroWin.Configuration;
+using MicroWin.IdService;
 
 namespace MicroWin
 {
@@ -27,12 +32,34 @@ namespace MicroWin
 
             services.AddControllers();
 
+            services.AddSingleton<IdRepo>();
+            services.AddSingleton<UserRepo>();
             services.AddSingleton<ApplicationConfigurationProperties>();
             services.AddSingleton<TelegramTokenValidator>((serviceProvider) => new TelegramTokenValidator(System.Environment.GetEnvironmentVariable("BOT_TOKEN")));
-            services.AddSingleton<AdminUserNamesProvider>((serviceProvider)=>new AdminUserNamesProvider(System.Environment.GetEnvironmentVariable("ADMIN_USERNAMES_PIPE_SEPERATED").Split("|")));
-            services.AddSingleton<AuthJwtTokenHandler>((serviceProvider)=>new AuthJwtTokenHandler(
+            services.AddSingleton<AdminUserNamesProvider>((serviceProvider) => new AdminUserNamesProvider(System.Environment.GetEnvironmentVariable("ADMIN_USERNAMES_PIPE_SEPERATED").Split("|")));
+            services.AddSingleton<AuthJwtTokenHandler>((serviceProvider) => new AuthJwtTokenHandler(
                 AuthJwtTokenOptions.SecuirtyKey, AuthJwtTokenOptions.Issuer, AuthJwtTokenOptions.Audience)
             );
+
+            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+           .AddJwtBearer(x =>
+           {
+               x.TokenValidationParameters = new TokenValidationParameters
+               {
+                   IssuerSigningKey = AuthJwtTokenOptions.SecuirtyKey,
+                   ValidateIssuer = true,
+                   ValidateAudience = true,
+                   ValidIssuer = AuthJwtTokenOptions.Issuer,
+                   ValidAudience = AuthJwtTokenOptions.Audience,
+                   ValidateLifetime=true,
+               };
+           });
+
+            services.AddSingleton((serviceProvider) =>
+                 new DbConnectionFactory(Configuration["DatabaseName"].Replace("~", serviceProvider.GetRequiredService<IHostEnvironment>().ContentRootPath))
+                 );
+            services.AddSingleton<IDatabaseBootstrap, DatabaseBootstrap>();
+
             // In production, the React files will be served from this directory
             services.AddSpaStaticFiles(configuration =>
             {
@@ -54,18 +81,23 @@ namespace MicroWin
                 app.UseHsts();
             }
 
+            app.ApplicationServices.GetRequiredService<IDatabaseBootstrap>().Setup();
+
             app.UseHttpsRedirection();
             app.UseStaticFiles();
             app.UseSpaStaticFiles();
 
             app.UseRouting();
-
+            JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
+            app.UseAuthentication();
+            app.UseAuthorization();
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllerRoute(
                     name: "default",
                     pattern: "{controller}/{action=Index}/{id?}");
             });
+           
 
             app.UseSpa(spa =>
             {
