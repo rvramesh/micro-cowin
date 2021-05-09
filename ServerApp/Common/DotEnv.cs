@@ -5,12 +5,12 @@ namespace MicroWin.Common
 {
     public static class DotEnv
     {
-        private static readonly string DEFAULT_ENVFILENAME = ".env";
+        private static readonly string defaultEnvFileName = ".env";
 
         public static void Load(string filePath=null)
         {
             var file = Path.GetFileName(filePath);
-            if (file == null || file == string.Empty) file = DEFAULT_ENVFILENAME;
+            if (file == null || file == string.Empty) file = defaultEnvFileName;
             var dir = Path.GetDirectoryName(filePath);
             if (dir == null || dir == string.Empty) dir = Directory.GetCurrentDirectory();
             filePath = Path.Combine(dir, file);

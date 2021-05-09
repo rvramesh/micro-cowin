@@ -11,9 +11,9 @@ namespace MicroWin.Authorization
 {
     public static class AuthJwtTokenOptions
     {
-        private static readonly string Key = System.Environment.GetEnvironmentVariable("BOT_TOKEN");
-        public static readonly string Issuer = System.Environment.GetEnvironmentVariable("BOT_ID");
-        public static readonly string Audience = System.Environment.GetEnvironmentVariable("BOT_ID");
+        private static readonly string Key = AppEnvironment.BotToken;
+        public static readonly string Issuer = AppEnvironment.BotId;
+        public static readonly string Audience = AppEnvironment.BotId;
         public static readonly SymmetricSecurityKey SecuirtyKey =
             new SymmetricSecurityKey(Encoding.ASCII.GetBytes(Key));
     }
