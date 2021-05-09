@@ -1,0 +1,13 @@
+CREATE TABLE Vax(
+    Id SMALLINT PRIMARY KEY AUTOINCREMENT,
+    Name VARCHAR(30) NOT NULL UNIQUE
+)
+INSERT INTO
+    Vax (Name)
+VALUES
+    ('Covishield');
+
+INSERT INTO
+    Vax (Name)
+VALUES
+    ('Covaxin');

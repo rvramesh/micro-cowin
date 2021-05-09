@@ -34,7 +34,7 @@ namespace MicroWin
 
             services.AddSingleton<IdRepo>();
             services.AddSingleton<UserRepo>();
-            services.AddSingleton<ApplicationConfigurationProperties>();
+            services.AddSingleton<ApplicationConfigurationRepo>();
             services.AddSingleton<TelegramTokenValidator>((serviceProvider) => new TelegramTokenValidator(AppEnvironment.BotToken));
             services.AddSingleton<AdminUserNamesProvider>((serviceProvider) => new AdminUserNamesProvider(AppEnvironment.AdminUserNames));
             services.AddSingleton<AuthJwtTokenHandler>((serviceProvider) => new AuthJwtTokenHandler(

@@ -1,10 +1,11 @@
 using System;
+using System.Collections.Generic;
 
 namespace MicroWin.Configuration
 {
     public class ApplicationConfigurationProperties
     {
-        public ApplicationConfigurationProperties()
+        public ApplicationConfigurationProperties(Dictionary<int, string> vaccines)
         {
             this.OrganizingBodyName = AppEnvironment.OrganizingBodyName;
             this.OrganizingBodyMemberName=AppEnvironment.OrganizingBodyMemberName;
@@ -13,6 +14,7 @@ namespace MicroWin.Configuration
             this.IdentifierName = AppEnvironment.IdentifierName;
             this.MinYear = AppEnvironment.MinYear;
             this.MaxYear = AppEnvironment.MaxYear;
+            this.Vaccines = vaccines;
         }
         public string OrganizingBodyName { get; init; }
         public string OrganizingBodyMemberName { get; init; }
@@ -22,5 +24,7 @@ namespace MicroWin.Configuration
        
         public int MinYear {get;init;}
         public int MaxYear{get;init;}
+
+        public Dictionary<int, string> Vaccines {get;init;}
     }
 }
