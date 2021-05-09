@@ -11,7 +11,6 @@ namespace MicroWin.Configuration
             this.OrganizingBodyFaqUrl = Environment.GetEnvironmentVariable("ORGANIZING_BODY_FAQ_URL");
             this.SourceUrl = Environment.GetEnvironmentVariable("SOURCE_URL");
             this.IdentifierName = Environment.GetEnvironmentVariable("IDENTIFIER_NAME");
-            this.IdentifierValues = Environment.GetEnvironmentVariable("IDENTIFIER_VALUES");
             this.MinYear = Convert.ToInt32(Environment.GetEnvironmentVariable("MIN_YEAR"));
             this.MaxYear = Convert.ToInt32(Environment.GetEnvironmentVariable("MAX_YEAR"));
         }
@@ -20,8 +19,7 @@ namespace MicroWin.Configuration
         public string OrganizingBodyFaqUrl { get; init; }
         public string SourceUrl { get; init; }
         public string IdentifierName { get; init; }
-        public string IdentifierValues { get; init; }
-
+       
         public int MinYear {get;init;}
         public int MaxYear{get;init;}
     }
