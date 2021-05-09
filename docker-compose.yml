@@ -10,3 +10,9 @@ services:
       dockerfile: ./Dockerfile
     ports:
       - 5000
+    volumes:
+      - dbdata:/data
+      - ./SeverApp/App_Data:/app/App_Data/
+
+volumes: 
+  dbdata:
