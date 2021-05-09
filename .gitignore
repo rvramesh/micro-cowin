@@ -235,3 +235,4 @@ _Pvt_Extensions
 .env
 
 **/*-[Tt][Ee][Ss][Tt][Dd][Aa][Tt][Aa].[Ss][Qq][Ll]
+*.sqlite
