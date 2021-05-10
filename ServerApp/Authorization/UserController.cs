@@ -81,9 +81,13 @@ namespace MicroWin.Authorization
         public async Task<ActionResult> AcceptTerms(AcceptTermsRequest input)
         {
             string id = base.User.Claims.SingleOrDefault(claim => claim.Type == JwtRegisteredClaimNames.Sub)?.Value;
+            //TODO: Implment cache
             bool isUnitValid = idRepo.Get(input.UnitId).Count() == 1;
             long userId;
-            if (isUnitValid && long.TryParse(id, out userId))
+            if (!isUnitValid) {
+                return BadRequest(new { sucess = false, message = "Invalid Unit" });
+            }
+            else if(long.TryParse(id, out userId))
             {
                 this.userRepo.Insert(new UserModel()
                 {
@@ -97,8 +101,9 @@ namespace MicroWin.Authorization
                 });
                 return await Task.FromResult(Ok());
             }
-            return NoContent();
-
+            else {
+                return BadRequest(new {sucess=false, message="Invalid Token"});
+            }
         }
     }
 }

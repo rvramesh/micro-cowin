@@ -14,6 +14,8 @@ namespace MicroWin.EnrollmentService
         public string Unit { get; set; }
         public char Status { get; set; }
         public int InviteCount { get; set; }
+        public DateTime LastUpdatedAt { get; set; }
+        public long LastUpdatedBy { get; set; }
 
         [Write(false)]
         public IList<int> VaccinesPreference {get;set;}

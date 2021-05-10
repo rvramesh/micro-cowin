@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using EnrollmentStatusMasterData = MicroWin.EnrollmentService.EnrollmentStatus;
 
 namespace MicroWin.Configuration
 {
@@ -15,6 +16,7 @@ namespace MicroWin.Configuration
             this.MinYear = AppEnvironment.MinYear;
             this.MaxYear = AppEnvironment.MaxYear;
             this.Vaccines = vaccines;
+            this.EnrollmentStatus = EnrollmentStatusMasterData.StatusMap;
         }
         public string OrganizingBodyName { get; init; }
         public string OrganizingBodyMemberName { get; init; }
@@ -26,5 +28,6 @@ namespace MicroWin.Configuration
         public int MaxYear{get;init;}
 
         public Dictionary<int, string> Vaccines {get;init;}
+        public Dictionary<char, string> EnrollmentStatus { get; init; }
     }
 }

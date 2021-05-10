@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Collections.Generic;
 using Dapper;
 using MicroWin.Common.Database;
@@ -10,6 +11,7 @@ namespace MicroWin.EnrollmentService
     {
         private readonly DbConnectionFactory _connectionFactory;
 
+        private const string ModelCols = "Enrollment.Id, Enrollment.Name,Enrollment.Yob,Enrollment.ScheduleFrom,Enrollment.ScheduledBy,Enrollment.Unit,Enrollment.Status,Enrollment.InviteCount,Enrollment.LastUpdatedBy,Enrollment.LastUpdatedDate";
         public EnrollmentRepo(DbConnectionFactory connectionFactory)
         {
             _connectionFactory = connectionFactory;
@@ -19,60 +21,125 @@ namespace MicroWin.EnrollmentService
         {
             using (var con = _connectionFactory.CreateConnection())
             {
-                var enrollments = new Dictionary<int, EnrollmentModel>();
-                const string sql = "SELECT Enrollment.Id,Enrollment.Name,Enrollment.Yob,Enrollment.ScheduleFrom,Enrollment.ScheduledBy,Enrollment.Unit,Enrollment.Status,Enrollment.InviteCount,Vax_Pref.VaxId FROM Enrollment INNER JOIN Vax_Pref ON Enrollment.Id = Vax_Pref.Id WHERE Enrollment.ScheduledBy=@userId";
+                var enrollments = new Dictionary<long, EnrollmentModel>();
+                const string sql = "SELECT " + ModelCols + ",Vax_Pref.VaxId FROM Enrollment INNER JOIN Vax_Pref ON Enrollment.Id = Vax_Pref.Id WHERE Enrollment.ScheduledBy=@userId";
 
-                Dictionary<long, EnrollmentModel> cache = new Dictionary<long, EnrollmentModel>();
                 con.Query<EnrollmentModel, VaccinePreferenceModel, EnrollmentModel>(
                     sql,
                     (enrollment, preference) =>
                     {
-                        if (!cache.ContainsKey(enrollment.Id))
+                        if (!enrollments.ContainsKey(enrollment.Id))
                         {
-                            cache.Add(enrollment.Id, enrollment);
+                            enrollments.Add(enrollment.Id, enrollment);
                         }
 
-                        EnrollmentModel cachedParent = cache[enrollment.Id];
-                        IList<int> children = cachedParent.VaccinesPreference;
+                        EnrollmentModel cachedEnrollment = enrollments[enrollment.Id];
+                        IList<int> children = cachedEnrollment.VaccinesPreference;
                         children.Add(preference.VaccineId);
-                        return cachedParent;
+                        return cachedEnrollment;
                     },
                     new { userId = telegramUserId });
 
-                return cache.Values;
+                return enrollments.Values;
+            }
+        }
+
+        public int GetCountByUnit(string unit)
+        {
+            using (var con = _connectionFactory.CreateConnection())
+            {
+                return con.ExecuteScalar<int>("SELECT COUNT(1) FROM Enrollment Where Unit = '@unit'", new { unit = unit });
+            }
+        }
+
+        internal EnrollmentModel Get(long id)
+        {
+            using (var con = _connectionFactory.CreateConnection())
+            {
+                var enrollments = new Dictionary<long, EnrollmentModel>();
+                const string sql = "SELECT " + ModelCols + ",Vax_Pref.VaxId FROM Enrollment INNER JOIN Vax_Pref ON Enrollment.Id = Vax_Pref.Id WHERE Enrollment.Id=@id";
+
+                con.Query<EnrollmentModel, VaccinePreferenceModel, EnrollmentModel>(
+                    sql,
+                    (enrollment, preference) =>
+                    {
+                        if (!enrollments.ContainsKey(enrollment.Id))
+                        {
+                            enrollments.Add(enrollment.Id, enrollment);
+                        }
+
+                        EnrollmentModel cachedEnrollment = enrollments[enrollment.Id];
+                        IList<int> children = cachedEnrollment.VaccinesPreference;
+                        children.Add(preference.VaccineId);
+                        return cachedEnrollment;
+                    },
+                    new { id = id });
+
+                return enrollments.Values.ElementAtOrDefault(0);
             }
         }
 
         public IEnumerable<long> Enroll(string unit, long telegramId,
-            (string name, int yob, DateTime scheduleFrom, int[] vaxIdPref)[] entries)
+           IEnumerable<EnrollmentModel> entries)
         {
             List<long> newIds = new List<long>();
             using (var con = _connectionFactory.CreateConnection())
             {
-                foreach (var entry in entries)
+                var transaction = con.BeginTransaction();
+                try
                 {
-                    EnrollmentModel model = new EnrollmentModel();
-                    model.Name = entry.name;
-                    model.Yob = entry.yob;
-                    model.ScheduleFrom = entry.scheduleFrom;
-                    model.ScheduledBy = telegramId;
-                    model.Unit = unit;
-                    model.Status = 'E';
-                    model.InviteCount = 0;
-                    long id = con.Insert<EnrollmentModel>(model);
-                    newIds.Add(id);
-                    foreach (var vaxPref in entry.vaxIdPref)
+                    foreach (var entry in entries)
                     {
-                        VaccinePreferenceModel vaxPrefModel = new VaccinePreferenceModel();
-                        vaxPrefModel.EnrollmentId = id;
-                        vaxPrefModel.VaccineId = vaxPref;
-                        con.Insert(vaxPrefModel);
+                        long id = con.Insert<EnrollmentModel>(entry);
+                        newIds.Add(id);
+                        foreach (var vaxPref in entry.VaccinesPreference)
+                        {
+                            VaccinePreferenceModel vaxPrefModel = new VaccinePreferenceModel();
+                            vaxPrefModel.EnrollmentId = id;
+                            vaxPrefModel.VaccineId = vaxPref;
+                            con.Insert(vaxPrefModel);
+                        }
                     }
-
+                    transaction.Commit();
+                }
+                catch
+                {
+                    transaction.Rollback();
+                    throw;
                 }
             }
             return newIds;
         }
 
+        internal bool UpdateEnrollment(string unit, long telegramId, EnrollmentModel model)
+        {
+            using (var con = _connectionFactory.CreateConnection())
+            {
+                var transaction = con.BeginTransaction();
+                try
+                {
+                    bool result = con.Update(model, transaction);
+                    con.Query("DELETE FROM Vax_Pref WHERE EnrollmentId=@enrollmentId", new
+                    {
+                        enrollmentId = model.Id
+                    }, transaction);
+                    foreach (var vaxPref in model.VaccinesPreference)
+                    {
+                        VaccinePreferenceModel vaxPrefModel = new VaccinePreferenceModel();
+                        vaxPrefModel.EnrollmentId = model.Id;
+                        vaxPrefModel.VaccineId = vaxPref;
+                        con.Insert(vaxPrefModel, transaction);
+                    }
+                    transaction.Commit();
+                    return result;
+                }
+                catch
+                {
+                    transaction.Rollback();
+                    throw;
+                }
+
+            }
+        }
     }
 }
