@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/dotnet/aspnet:5.0 AS base
+FROM mcr.microsoft.com/dotnet/aspnet:5.0-alpine AS base
 WORKDIR /app
 EXPOSE 5000
 
@@ -12,23 +12,22 @@ RUN adduser -u 5678 --disabled-password --gecos "" appuser && chown -R appuser /
 USER appuser
 VOLUME [ "/data" ]
 
-FROM mcr.microsoft.com/dotnet/sdk:5.0 AS build
-RUN curl -sL https://deb.nodesource.com/setup_14.x |  bash -
-RUN apt-get install -y nodejs
-RUN curl -sL https://dl.yarnpkg.com/debian/pubkey.gpg | gpg --dearmor |  tee /usr/share/keyrings/yarnkey.gpg >/dev/null
-RUN echo "deb [signed-by=/usr/share/keyrings/yarnkey.gpg] https://dl.yarnpkg.com/debian stable main" |  tee /etc/apt/sources.list.d/yarn.list
-RUN  apt-get update &&  apt-get install yarn
+FROM mcr.microsoft.com/dotnet/sdk:5.0-alpine AS build
+RUN apk update 
+ENV ALPINE_MIRROR "http://dl-cdn.alpinelinux.org/alpine"
+RUN echo "${ALPINE_MIRROR}/edge/main" >> /etc/apk/repositories
+RUN apk add --no-cache nodejs-current yarn --repository="http://dl-cdn.alpinelinux.org/alpine/edge/community"
+
 WORKDIR /src
 COPY ["micro-win.csproj", "./"]
-RUN dotnet restore "micro-win.csproj"
+RUN dotnet restore "micro-win.csproj" --runtime alpine-x64
 COPY . .
 WORKDIR "/src/."
-RUN dotnet build "micro-win.csproj" -c Release -o /app/build
 
 FROM build AS publish
-RUN dotnet publish "micro-win.csproj" -c Release -r linux-x64 --self-contained false -o /app/publish
+RUN dotnet publish "micro-win.csproj" -c Release -r alpine-x64 --self-contained true /p:PublishTrimmed=true /p:PublishSingleFile=true -o /app/publish
 
-FROM base AS final
+FROM mcr.microsoft.com/dotnet/runtime-deps:5.0-alpine AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
-ENTRYPOINT ["dotnet", "micro-win.dll"]
+ENTRYPOINT ["./micro-win"]
