@@ -17,6 +17,7 @@ namespace MicroWin.Configuration
             this.MaxYear = AppEnvironment.MaxYear;
             this.Vaccines = vaccines;
             this.EnrollmentStatus = EnrollmentStatusMasterData.StatusMap;
+            this.MaxEnrollmentPerUnit = 8;
         }
         public string OrganizingBodyName { get; init; }
         public string OrganizingBodyMemberName { get; init; }
@@ -29,5 +30,6 @@ namespace MicroWin.Configuration
 
         public Dictionary<int, string> Vaccines {get;init;}
         public Dictionary<char, string> EnrollmentStatus { get; init; }
+        public int MaxEnrollmentPerUnit { get; init; }
     }
 }

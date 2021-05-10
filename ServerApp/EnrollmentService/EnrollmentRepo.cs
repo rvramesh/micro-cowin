@@ -22,7 +22,7 @@ namespace MicroWin.EnrollmentService
             using (var con = _connectionFactory.CreateConnection())
             {
                 var enrollments = new Dictionary<long, EnrollmentModel>();
-                const string sql = "SELECT " + ModelCols + ",Vax_Pref.VaxId FROM Enrollment INNER JOIN Vax_Pref ON Enrollment.Id = Vax_Pref.Id WHERE Enrollment.ScheduledBy=@userId";
+                const string sql = "SELECT " + ModelCols + ",Vax_Pref.VaxId FROM Enrollment INNER JOIN Vax_Pref ON Enrollment.Id = Vax_Pref.Id WHERE Enrollment.ScheduledBy=@userId ORDER BY Enrollment.ID ASC, Vax_Pref.Priority ASC";
 
                 con.Query<EnrollmentModel, VaccinePreferenceModel, EnrollmentModel>(
                     sql,
@@ -57,7 +57,7 @@ namespace MicroWin.EnrollmentService
             using (var con = _connectionFactory.CreateConnection())
             {
                 var enrollments = new Dictionary<long, EnrollmentModel>();
-                const string sql = "SELECT " + ModelCols + ",Vax_Pref.VaxId FROM Enrollment INNER JOIN Vax_Pref ON Enrollment.Id = Vax_Pref.Id WHERE Enrollment.Id=@id";
+                const string sql = "SELECT " + ModelCols + ",Vax_Pref.VaxId FROM Enrollment INNER JOIN Vax_Pref ON Enrollment.Id = Vax_Pref.Id WHERE Enrollment.Id=@id ORDER BY Vax_Pref.Priority";
 
                 con.Query<EnrollmentModel, VaccinePreferenceModel, EnrollmentModel>(
                     sql,
@@ -92,11 +92,13 @@ namespace MicroWin.EnrollmentService
                     {
                         long id = con.Insert<EnrollmentModel>(entry);
                         newIds.Add(id);
+                        int priority=1;
                         foreach (var vaxPref in entry.VaccinesPreference)
                         {
                             VaccinePreferenceModel vaxPrefModel = new VaccinePreferenceModel();
                             vaxPrefModel.EnrollmentId = id;
                             vaxPrefModel.VaccineId = vaxPref;
+                            vaxPrefModel.Priority = priority++;
                             con.Insert(vaxPrefModel);
                         }
                     }
@@ -123,11 +125,13 @@ namespace MicroWin.EnrollmentService
                     {
                         enrollmentId = model.Id
                     }, transaction);
+                    int priority = 1;
                     foreach (var vaxPref in model.VaccinesPreference)
                     {
                         VaccinePreferenceModel vaxPrefModel = new VaccinePreferenceModel();
                         vaxPrefModel.EnrollmentId = model.Id;
                         vaxPrefModel.VaccineId = vaxPref;
+                        vaxPrefModel.Priority = priority++;
                         con.Insert(vaxPrefModel, transaction);
                     }
                     transaction.Commit();

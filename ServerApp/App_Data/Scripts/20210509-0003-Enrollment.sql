@@ -16,6 +16,7 @@ CREATE INDEX idx_vax_scheduledBy ON Enrollment(ScheduledBy);
 CREATE TABLE Vax_Pref (
     EnrollmentId BIGINT NOT NULL,
     VaxId SMALLINT NOT NULL,
+    Priority SMALLINT NOT NULL,
     IsTaken boolean,
     PRIMARY KEY (EnrollmentId, IsTaken)
 )
