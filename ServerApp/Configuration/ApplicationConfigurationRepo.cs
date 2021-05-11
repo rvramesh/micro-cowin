@@ -18,6 +18,7 @@ namespace MicroWin.Configuration
         public ApplicationConfigurationRepo(DbConnectionFactory connectionFactory)
         {
             _connectionFactory = connectionFactory;
+            this.Refresh();
         }
 
         public ApplicationConfigurationProperties Get()

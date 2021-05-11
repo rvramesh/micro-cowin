@@ -5,7 +5,7 @@ import { useController, useFormContext } from "react-hook-form";
 import { useApplicationContext } from "../../../context/ApplicationContext";
 
 function VaccinesPref({ parentName }: { parentName: string }) {
-  const { vaxines } = useApplicationContext();
+  const { vaccines } = useApplicationContext();
   const {
     register,
     formState: { errors },
@@ -28,24 +28,22 @@ function VaccinesPref({ parentName }: { parentName: string }) {
     },
     control: control,
   });
-  const vaxPreferredFieldValue = !res.field.value ? [] : res.field.value;
+  const vaxPreferredFieldValue :number[] = !res.field.value ? [] : res.field.value;
 
   console.log("render", { vaxPreferredFieldValue });
   //   const [selectedVax, changeSelectedVax] = useState<string[]>(
   //     vaxPreferredFieldValue
   //   );
 
-  const addVax = (name: string) => {
-    const newVal = [...vaxPreferredFieldValue, name];
+  const addVax = (id: number) => {
+    const newVal = [...vaxPreferredFieldValue, id];
     clearErrors(vaxPreferredFieldName);
     console.log("addVax", { newVal });
     setValue(vaxPreferredFieldName, newVal, { shouldDirty: true });
-    //res.field.onChange({newVal);
-    // changeSelectedVax(newVal);
   };
 
-  const removeVax = (name: string) => {
-    const newVal = vaxPreferredFieldValue.filter((vax: any) => vax !== name);
+  const removeVax = (id: number) => {
+    const newVal = vaxPreferredFieldValue.filter((vax: any) => vax !== id);
     if (newVal.length === 0) {
       setError(vaxPreferredFieldName, {
         type: "minLength",
@@ -62,34 +60,37 @@ function VaccinesPref({ parentName }: { parentName: string }) {
   return (
     <>
       {" "}
-      <div className="w-full text-lg text-gray-700 dark:text-gray-500" ref={res.field.ref}>
+      <div
+        className="w-full text-lg text-gray-700 dark:text-gray-500"
+        ref={res.field.ref}
+      >
         Check Vaccines in order of preference. Check only the vaccines you
         prefer and leave others unchecked.
       </div>
       <div className="w-full flex-1 justify-between">
-        {vaxines.map((obj) => (
-          <Label
-            key={`${vaxPreferredFieldName}-label-${obj.id}`}
-            check
-            className="w-1/2 sm:w-1/3 md:w-1/4 lg:w-1/5"
-          >
-            <Input
-              className="m-2 h-8 w-8"
-              type="checkbox"
-              key={`${vaxPreferredFieldName}-input-${obj.id}`}
-              value={obj.name}
-              onBlur={res.field.onBlur}
-              onChange={(ev) => {
-                console.log("onClick", ev.currentTarget.checked);
-                ev.currentTarget.checked
-                  ? addVax(obj.name)
-                  : removeVax(obj.name);
-              }}
-              checked={vaxPreferredFieldValue.includes(obj.name)}
-            />
-            <span className="text-lg">{obj.name}</span>
-          </Label>
-        ))}
+        {Object.keys(vaccines)
+          .map(Number)
+          .map((vaxId) => {
+            return (<Label
+              key={`${vaxPreferredFieldName}-label-${vaxId}`}
+              check
+              className="w-1/2 sm:w-1/3 md:w-1/4 lg:w-1/5"
+            >
+              <Input
+                className="m-2 h-8 w-8"
+                type="checkbox"
+                key={`${vaxPreferredFieldName}-input-${vaxId}`}
+                value={vaxId}
+                onBlur={res.field.onBlur}
+                onChange={(ev) => {
+                  console.log("onClick", ev.currentTarget.checked);
+                  ev.currentTarget.checked ? addVax(vaxId) : removeVax(vaxId);
+                }}
+                checked={vaxPreferredFieldValue.includes(vaxId)}
+              />
+              <span className="text-lg">{vaccines[vaxId]}</span>
+            </Label>
+          )})}
       </div>
       <div>
         <ErrorMessage
@@ -107,11 +108,11 @@ function VaccinesPref({ parentName }: { parentName: string }) {
           <div className="font-semibold text-gray-700 dark:text-gray-500">
             Order of Preference
           </div>
-          {vaxPreferredFieldValue.map((vax: any, index: any) => (
+          {vaxPreferredFieldValue.map((vax, index) => (
             <div
               key={`${vaxPreferredFieldName}-order-label-${index}`}
               className="text-gray-700 dark:text-gray-500"
-            >{`${index + 1} - ${vax}`}</div>
+            >{`${index + 1} - ${vaccines[vax]}`}</div>
           ))}
         </div>
       )}

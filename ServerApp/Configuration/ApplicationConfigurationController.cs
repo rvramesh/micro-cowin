@@ -7,14 +7,14 @@ namespace MicroWin.Configuration
     [ApiController] 
     public class ApplicationConfigurationController : Controller
     {
-        public ApplicationConfigurationRepo ApplicationConfigurationProperties { get;init;}
+        public ApplicationConfigurationRepo ApplicationConfigurationProvider { get;init;}
         public ApplicationConfigurationController(ApplicationConfigurationRepo properties){
-            this.ApplicationConfigurationProperties = properties;
+            this.ApplicationConfigurationProvider = properties;
         }
         [HttpGet]
         public async Task<ActionResult<ApplicationConfigurationProperties>> Get()
         {
-            return await Task.FromResult(this.ApplicationConfigurationProperties.Get());
+            return await Task.FromResult(this.ApplicationConfigurationProvider.Get());
         }
     }
 }

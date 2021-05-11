@@ -2,10 +2,10 @@
 import PageTitle from "../../components/Typography/PageTitle";
 import { FormProvider, useFieldArray, useForm } from "react-hook-form";
 
-import React, { useEffect, useLayoutEffect, useState } from "react";
-import { useAuthContext, useAuthenticatedContext } from "../../context/AuthenticationContext";
+import { useEffect, useState } from "react";
+import { useAuthenticatedContext } from "../../context/AuthenticationContext";
 import { Button } from "@windmill/react-ui";
-import PersonCard, { Person } from "./components/PersonCard";
+import EnrollmentCard from "./components/EnrollmentCard";
 
 function useStackableCard() {
     const [currentActive, setCurrentActive] = useState<number|null>(1);
@@ -33,7 +33,6 @@ function useStackableCard() {
 }
 const colorNames = ["bg-pink-600", "bg-blue-600", "bg-green-600", "bg-indigo-600","bg-red-600","bg-purple-600","bg-yellow-600","bg-blue-600"];
 
-const pageBottomId = "page-bottom";
 
 
 function Enrollment() {
@@ -41,8 +40,9 @@ function Enrollment() {
   const authContext = useAuthenticatedContext();
   const userName =  authContext.first_name;
   const formMethods = useForm();
+
   
-  const { fields, append, prepend, remove, swap, move, insert } = useFieldArray({
+  const { fields, append, remove } = useFieldArray({
     control:formMethods.control,
     name: "person",
     keyName:"id"
@@ -66,8 +66,9 @@ function Enrollment() {
         <form className="form" onSubmit={formMethods.handleSubmit(onSubmit)}>
           <FormProvider {...formMethods}>
             {fields.map((item, index) => (
-              <PersonCard
-                {...register<Person>({}, index)}
+              <EnrollmentCard
+                index={index}
+              
                 colorCss={colorNames[index % 8]}
                 name={"person"}
                 onRemove={() => {

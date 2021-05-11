@@ -53,8 +53,14 @@ namespace MicroWin.Common.Database
                     .ToList()
                     .ForEach(script =>
                     {
+                        try
+                        {
                         // Execute each one of the scripts 
                         connection.Execute(GetSql(path,script));
+                        }
+                        catch (SqliteException ex){
+                           throw new Exception($"Error executing {script}", ex);
+                        }
                         // record that it was executed in the migrationscripts table 
                         connection.Execute(MIGRATION_INSERT_SCRIPT,
                                                  new { Name = script });

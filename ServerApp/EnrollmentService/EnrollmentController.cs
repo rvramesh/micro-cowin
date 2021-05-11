@@ -37,9 +37,14 @@ namespace MicroWin.EnrollmentService
             }
         }
 
-        [HttpPost()]
+        [HttpPost]
         public async Task<ActionResult<IEnumerable<int>>> Enroll(IEnumerable<EnrollmentRequest> persons)
         {
+            foreach(var person in persons){
+                if(person.VaccinePreferences.Length<1) {
+                    return BadRequest(new{success=false, message = "All persons to be enrolled, should have atleast one vaccine in their preference"});
+                }
+            }
             string id = base.User.Claims.SingleOrDefault(claim => claim.Type == JwtRegisteredClaimNames.Sub)?.Value;
             string unit = base.User.Claims.SingleOrDefault(claim => claim.Type == ClaimTypes.UserData)?.Value;
             long telegramId;
@@ -49,6 +54,7 @@ namespace MicroWin.EnrollmentService
             {
                 return BadRequest(new {success = false, message = $"You have exceeded the max enrollment. You can enroll maximum of {maxEnrollment}"});
             }
+
             if (long.TryParse(id, out telegramId))
             {
                var entrollments = persons.Select(entry=>new EnrollmentModel(){
@@ -61,7 +67,7 @@ namespace MicroWin.EnrollmentService
                     InviteCount = 0,
                     LastUpdatedAt = DateTime.UtcNow,
                     LastUpdatedBy = telegramId,
-                    VaccinesPreference = entry.VaxIds.ToList()
+                    VaccinesPreference = entry.VaccinePreferences.ToList()
                        
                 });
                 return await Task.FromResult(Ok(this.enrollmentRepo.Enroll(unit, telegramId,entrollments)));
@@ -75,6 +81,10 @@ namespace MicroWin.EnrollmentService
         [HttpPost("/{id}")]
         public async Task<ActionResult<IEnumerable<int>>> Update(long id, EnrollmentRequest request)
         {
+            if (request.VaccinePreferences.Length < 1)
+            {
+                return BadRequest(new { success = false, message = "Please select atleast one vaccine." });
+            }
             var enrollment = this.enrollmentRepo.Get(id);
             if(enrollment ==null)
             {
@@ -83,6 +93,7 @@ namespace MicroWin.EnrollmentService
             if(enrollment.Status != EnrollmentStatus.Enrolled){
                 return BadRequest(new {success = false, message = "Only records with status Enrolled can be updated."});
             }
+            
             string userId = base.User.Claims.SingleOrDefault(claim => claim.Type == JwtRegisteredClaimNames.Sub)?.Value;
             string unit = base.User.Claims.SingleOrDefault(claim => claim.Type == ClaimTypes.UserData)?.Value;
             long telegramId;
@@ -93,7 +104,7 @@ namespace MicroWin.EnrollmentService
                 enrollment.Name = request.Name;
                 enrollment.Yob = request.Yob;
                 enrollment.ScheduleFrom = request.ScheduleFrom;
-                enrollment.VaccinesPreference = request.VaxIds;
+                enrollment.VaccinesPreference = request.VaccinePreferences;
                 return await Task.FromResult(Ok(this.enrollmentRepo.UpdateEnrollment(unit, telegramId, enrollment)));
             }
             else
