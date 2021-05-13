@@ -4,6 +4,7 @@ using Dapper.Contrib.Extensions;
 
 namespace MicroWin.EnrollmentService
 {
+    [Table("Enrollment")]
     public class EnrollmentModel
     {
         public long Id { get; set; }

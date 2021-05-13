@@ -11,7 +11,7 @@ namespace MicroWin.EnrollmentService
     {
         private readonly DbConnectionFactory _connectionFactory;
 
-        private const string ModelCols = "Enrollment.Id, Enrollment.Name,Enrollment.Yob,Enrollment.ScheduleFrom,Enrollment.ScheduledBy,Enrollment.Unit,Enrollment.Status,Enrollment.InviteCount,Enrollment.LastUpdatedBy,Enrollment.LastUpdatedDate";
+        private const string ModelCols = "Enrollment.Id, Enrollment.Name,Enrollment.Yob,Enrollment.ScheduleFrom,Enrollment.ScheduledBy,Enrollment.Unit,Enrollment.Status,Enrollment.InviteCount,Enrollment.LastUpdatedBy,Enrollment.LastUpdatedAt";
         public EnrollmentRepo(DbConnectionFactory connectionFactory)
         {
             _connectionFactory = connectionFactory;
@@ -22,7 +22,7 @@ namespace MicroWin.EnrollmentService
             using (var con = _connectionFactory.CreateConnection())
             {
                 var enrollments = new Dictionary<long, EnrollmentModel>();
-                const string sql = "SELECT " + ModelCols + ",Vax_Pref.VaxId FROM Enrollment INNER JOIN Vax_Pref ON Enrollment.Id = Vax_Pref.Id WHERE Enrollment.ScheduledBy=@userId ORDER BY Enrollment.ID ASC, Vax_Pref.Priority ASC";
+                const string sql = "SELECT " + ModelCols + ",Vax_Pref.EnrollmentId, Vax_Pref.VaxId FROM Enrollment INNER JOIN Vax_Pref ON Enrollment.Id = Vax_Pref.EnrollmentId WHERE Enrollment.ScheduledBy=@userId ORDER BY Enrollment.ID ASC, Vax_Pref.Priority ASC";
 
                 con.Query<EnrollmentModel, VaccinePreferenceModel, EnrollmentModel>(
                     sql,
@@ -30,15 +30,17 @@ namespace MicroWin.EnrollmentService
                     {
                         if (!enrollments.ContainsKey(enrollment.Id))
                         {
+                            enrollment.VaccinesPreference = new List<int>();
                             enrollments.Add(enrollment.Id, enrollment);
                         }
 
                         EnrollmentModel cachedEnrollment = enrollments[enrollment.Id];
                         IList<int> children = cachedEnrollment.VaccinesPreference;
-                        children.Add(preference.VaccineId);
+                        children.Add(preference.VaxId);
                         return cachedEnrollment;
                     },
-                    new { userId = telegramUserId });
+                    new { userId = telegramUserId },
+                    splitOn:"EnrollmentId");
 
                 return enrollments.Values;
             }
@@ -57,7 +59,7 @@ namespace MicroWin.EnrollmentService
             using (var con = _connectionFactory.CreateConnection())
             {
                 var enrollments = new Dictionary<long, EnrollmentModel>();
-                const string sql = "SELECT " + ModelCols + ",Vax_Pref.VaxId FROM Enrollment INNER JOIN Vax_Pref ON Enrollment.Id = Vax_Pref.Id WHERE Enrollment.Id=@id ORDER BY Vax_Pref.Priority";
+                const string sql = "SELECT " + ModelCols + ",Vax_Pref.EnrollmentId, Vax_Pref.VaxId FROM Enrollment INNER JOIN Vax_Pref ON Enrollment.Id = Vax_Pref.EnrollmentId WHERE Enrollment.Id=@id ORDER BY Vax_Pref.Priority";
 
                 con.Query<EnrollmentModel, VaccinePreferenceModel, EnrollmentModel>(
                     sql,
@@ -65,15 +67,18 @@ namespace MicroWin.EnrollmentService
                     {
                         if (!enrollments.ContainsKey(enrollment.Id))
                         {
+                            enrollment.VaccinesPreference = new List<int>();
                             enrollments.Add(enrollment.Id, enrollment);
                         }
 
                         EnrollmentModel cachedEnrollment = enrollments[enrollment.Id];
                         IList<int> children = cachedEnrollment.VaccinesPreference;
-                        children.Add(preference.VaccineId);
+                        children.Add(preference.VaxId);
                         return cachedEnrollment;
                     },
-                    new { id = id });
+                    
+                    new { id = id },
+                    splitOn:"EnrollmentId");
 
                 return enrollments.Values.ElementAtOrDefault(0);
             }
@@ -85,6 +90,7 @@ namespace MicroWin.EnrollmentService
             List<long> newIds = new List<long>();
             using (var con = _connectionFactory.CreateConnection())
             {
+                con.Open();
                 var transaction = con.BeginTransaction();
                 try
                 {
@@ -97,7 +103,7 @@ namespace MicroWin.EnrollmentService
                         {
                             VaccinePreferenceModel vaxPrefModel = new VaccinePreferenceModel();
                             vaxPrefModel.EnrollmentId = id;
-                            vaxPrefModel.VaccineId = vaxPref;
+                            vaxPrefModel.VaxId = vaxPref;
                             vaxPrefModel.Priority = priority++;
                             con.Insert(vaxPrefModel);
                         }
@@ -117,6 +123,7 @@ namespace MicroWin.EnrollmentService
         {
             using (var con = _connectionFactory.CreateConnection())
             {
+                con.Open();
                 var transaction = con.BeginTransaction();
                 try
                 {
@@ -130,7 +137,7 @@ namespace MicroWin.EnrollmentService
                     {
                         VaccinePreferenceModel vaxPrefModel = new VaccinePreferenceModel();
                         vaxPrefModel.EnrollmentId = model.Id;
-                        vaxPrefModel.VaccineId = vaxPref;
+                        vaxPrefModel.VaxId = vaxPref;
                         vaxPrefModel.Priority = priority++;
                         con.Insert(vaxPrefModel, transaction);
                     }

@@ -33,7 +33,7 @@ namespace MicroWin.EnrollmentService
             {
                return await Task.FromResult(Ok(this.enrollmentRepo.GetByScheduler(telegramId)));
             } else {
-                return BadRequest(new { sucess = false, message = "Invalid Token" });
+                return BadRequest(new { success = false, type="Error", message = "Invalid Token" });
             }
         }
 
@@ -42,7 +42,7 @@ namespace MicroWin.EnrollmentService
         {
             foreach(var person in persons){
                 if(person.VaccinePreferences.Length<1) {
-                    return BadRequest(new{success=false, message = "All persons to be enrolled, should have atleast one vaccine in their preference"});
+                    return BadRequest(new{success=false, type="Error", message = "All persons to be enrolled, should have atleast one vaccine in their preference"});
                 }
             }
             string id = base.User.Claims.SingleOrDefault(claim => claim.Type == JwtRegisteredClaimNames.Sub)?.Value;
@@ -52,7 +52,7 @@ namespace MicroWin.EnrollmentService
             int maxEnrollment = config.Get().MaxEnrollmentPerUnit;
             if((currentlyEnrolled+persons.Count())>maxEnrollment)
             {
-                return BadRequest(new {success = false, message = $"You have exceeded the max enrollment. You can enroll maximum of {maxEnrollment}"});
+                return BadRequest(new {success = false, type = "Error", message = $"You have exceeded the max enrollment. You can enroll maximum of {maxEnrollment}"});
             }
 
             if (long.TryParse(id, out telegramId))
@@ -74,7 +74,36 @@ namespace MicroWin.EnrollmentService
             }
             else
             {
-                return BadRequest(new { sucess = false, message = "Invalid Token" });
+                return BadRequest(new { success = false, type="Error", message = "Invalid Token" });
+            }
+        }
+
+        [HttpPost("{id}/withdraw")]
+        public ActionResult<IEnumerable<int>> Withdraw(long id)
+        {
+            var enrollment = enrollmentRepo.Get(id);
+            if(enrollment == null ) {
+                return NotFound();
+            }
+            if(enrollment.Status != EnrollmentStatus.Enrolled &&
+            enrollment.Status != EnrollmentStatus.Scheduled) {
+                return BadRequest(new {success=false, type="Error", message = "Cannot withdraw enrollment at current status."});
+            }
+            string userId = base.User.Claims.SingleOrDefault(claim => claim.Type == JwtRegisteredClaimNames.Sub)?.Value;
+            string unit = base.User.Claims.SingleOrDefault(claim => claim.Type == ClaimTypes.UserData)?.Value;
+            long telegramId;
+            if (long.TryParse(userId, out telegramId))
+            {
+                if(telegramId == enrollment.ScheduledBy) {
+                enrollment.Status = EnrollmentStatus.Withdrawn;
+                enrollmentRepo.UpdateEnrollment(unit, telegramId,enrollment);
+                return Ok();
+                }
+                else {
+                    return BadRequest(new { success = false, type = "Error", message = "Not Authorized" });
+                }
+            } else {
+                return BadRequest(new { success = false, type="Error", message = "Invalid Token" });
             }
         }
 
@@ -83,15 +112,15 @@ namespace MicroWin.EnrollmentService
         {
             if (request.VaccinePreferences.Length < 1)
             {
-                return BadRequest(new { success = false, message = "Please select atleast one vaccine." });
+                return BadRequest(new { success = false, type = "Error", message = "Please select atleast one vaccine." });
             }
             var enrollment = this.enrollmentRepo.Get(id);
             if(enrollment ==null)
             {
                 return NotFound();
             }
-            if(enrollment.Status != EnrollmentStatus.Enrolled){
-                return BadRequest(new {success = false, message = "Only records with status Enrolled can be updated."});
+            if(enrollment.Status != EnrollmentStatus.Enrolled || enrollment.Status != EnrollmentStatus.Scheduled){
+                return BadRequest(new {success = false, type = "Error", message = "Only records with status Enrolled can be updated."});
             }
             
             string userId = base.User.Claims.SingleOrDefault(claim => claim.Type == JwtRegisteredClaimNames.Sub)?.Value;
@@ -109,7 +138,7 @@ namespace MicroWin.EnrollmentService
             }
             else
             {
-                return BadRequest(new { sucess = false, message = "Invalid Token" });
+                return BadRequest(new { success = false, type="Error", message = "Invalid Token" });
             }
         }
     }

@@ -4,16 +4,17 @@ import { createContext, useContext } from "react";
 import { ReactNode } from "react";
 import { Backdrop, Card, CardBody } from "@windmill/react-ui";
 
-interface ApplicationConfigurationProperties {
+export interface ApplicationConfigurationProperties {
   organizingBodyName: string;
   organizingBodyMemberName: string;
   organizingBodyFaqUrl: string;
   sourceUrl: string;
   identifierName: string;
-  identifierValues: string;
-  minYear:number;
-  maxYear:number;
-  vaccines: {[index:number]: string}
+  minYear: number;
+  maxYear: number;
+  vaccines: { [key: number]: string };
+  enrollmentStatus: { [key: string]: string };
+  maxEnrollmentPerUnit: number;
 }
 const getApplicationConfiguration = async () => {
   const { data } = await axios.get<ApplicationConfigurationProperties>(
@@ -33,16 +34,17 @@ function useApplicationConfiguration() {
   });
 }
 
-const initialValues = {
+const initialValues : ApplicationConfigurationProperties = {
   organizingBodyName: "",
   organizingBodyMemberName: "",
   organizingBodyFaqUrl: "",
   sourceUrl: "",
   identifierName: "",
-  identifierValues: "",
   minYear: 2021 - 18,
   maxYear: 2021 - 110,
-  vaccines: [],
+  vaccines: {},
+  enrollmentStatus : {},
+  maxEnrollmentPerUnit:8
 };
 const ApplicationContext = createContext<ApplicationConfigurationProperties>(
   initialValues

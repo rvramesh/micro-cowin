@@ -85,7 +85,7 @@ namespace MicroWin.Authorization
             bool isUnitValid = idRepo.Get(input.UnitId).Count() == 1;
             long userId;
             if (!isUnitValid) {
-                return BadRequest(new { sucess = false, message = "Invalid Unit" });
+                return BadRequest(new { success = false, type="Error", message = "Invalid Unit" });
             }
             else if(long.TryParse(id, out userId))
             {
@@ -102,7 +102,7 @@ namespace MicroWin.Authorization
                 return await Task.FromResult(Ok());
             }
             else {
-                return BadRequest(new {sucess=false, message="Invalid Token"});
+                return BadRequest(new {success=false, type="Error", message="Invalid Token"});
             }
         }
     }

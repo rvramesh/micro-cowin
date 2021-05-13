@@ -1,7 +1,7 @@
 import { ErrorMessage } from "@hookform/error-message";
 import { Label, Input, HelperText } from "@windmill/react-ui";
 import React from "react";
-import { useFormContext,get } from "react-hook-form";
+import { useFormContext, get, DeepMap, FieldValues, FieldError } from "react-hook-form";
 import { useApplicationContext } from "../../../context/ApplicationContext";
 
 function YOBField({ parentName }: { parentName: string }) {
@@ -12,8 +12,22 @@ function YOBField({ parentName }: { parentName: string }) {
   const { minYear, maxYear } = useApplicationContext();
 
   const yobFieldName = `${parentName}.yob`;
-  const yobError = get(errors, yobFieldName);
+  const yobError: DeepMap<FieldValues, FieldError> | undefined = get(
+    errors,
+    yobFieldName
+  );
 
+  const fieldProps = register(yobFieldName, {
+    min: {
+      value: maxYear,
+      message: `Year of birth should be above ${maxYear}`,
+    },
+    max: {
+      value: minYear,
+      message: `Year of birth should be below ${minYear}`,
+    },
+    required: { value: true, message: "Year of Birth is required" },
+  });
   return (
     <Label>
       <span className="text-lg text-gray-700 dark:text-gray-500">
@@ -23,17 +37,7 @@ function YOBField({ parentName }: { parentName: string }) {
         valid={yobError !== undefined ? false : undefined}
         type="number"
         maxLength={20}
-        {...register(yobFieldName, {
-          min: {
-            value: maxYear,
-            message: `Year of birth should be above ${maxYear}`,
-          },
-          max: {
-            value: minYear,
-            message: `Year of birth should be below ${minYear}`,
-          },
-          required: { value: true, message: "Year of Birth is required" },
-        })}
+        {...fieldProps}
       />
       <ErrorMessage
         errors={errors}

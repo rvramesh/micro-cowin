@@ -8,7 +8,7 @@ function NameField({ parentName }: { parentName: string }) {
     register,
     formState: { errors },
   } = useFormContext();
-  const initialsFieldName = `${parentName}.initials`;
+  const initialsFieldName = `${parentName}.name`;
   const initialsError = get(errors, initialsFieldName);
   return (
     <Label>

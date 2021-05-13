@@ -12,6 +12,7 @@ using MicroWin.Authorization;
 using MicroWin.Common;
 using MicroWin.Common.Database;
 using MicroWin.Configuration;
+using MicroWin.EnrollmentService;
 using MicroWin.IdService;
 
 namespace MicroWin
@@ -40,6 +41,8 @@ namespace MicroWin
             services.AddSingleton<AuthJwtTokenHandler>((serviceProvider) => new AuthJwtTokenHandler(
                 AuthJwtTokenOptions.SecuirtyKey, AuthJwtTokenOptions.Issuer, AuthJwtTokenOptions.Audience)
             );
+
+            services.AddSingleton<EnrollmentRepo>();
 
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
            .AddJwtBearer(x =>

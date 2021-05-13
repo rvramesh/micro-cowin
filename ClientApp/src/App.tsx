@@ -15,7 +15,6 @@ const SessionTimeout = lazy(() => import("./pages/SessionTimeout"));
 const Page404 = lazy(() => import("./pages/404"));
 function App() {
   const { isAuthenticated } = useAuthContext();
-  console.log("isAutheticated", isAuthenticated);
   return (
     <>
       <Router>

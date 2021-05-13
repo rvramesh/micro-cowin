@@ -9,7 +9,7 @@ function ScheduleDate({ parentName }: { parentName: string }) {
     register,
     formState: { errors },
   } = useFormContext();
-  const dateOnwardsFieldName = `${parentName}.dateOnwards`;
+  const dateOnwardsFieldName = `${parentName}.scheduleFrom`;
   const dateOnwardsFieldError = get(errors, dateOnwardsFieldName);
 
   return (

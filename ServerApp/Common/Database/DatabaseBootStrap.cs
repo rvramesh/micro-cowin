@@ -55,6 +55,7 @@ namespace MicroWin.Common.Database
                     {
                         try
                         {
+                            Console.WriteLine($"Processing {script}");
                         // Execute each one of the scripts 
                         connection.Execute(GetSql(path,script));
                         }
@@ -69,16 +70,6 @@ namespace MicroWin.Common.Database
 
         static string GetSql(string path, string fileName) =>
                      File.ReadAllText(Path.Combine(path,$"{fileName}.sql"));
-        public void Setup1()
-        {
-            using var connection = connectionFactory.CreateConnection();
-
-            var table = connection.Query<string>("SELECT name FROM sqlite_master WHERE type='table' AND name = 'ID_VALS';");
-            var tableName = table.FirstOrDefault();
-            if (!string.IsNullOrEmpty(tableName) && tableName == "ID_VALS")
-                return;
-
-
-        }
+       
     }
 }

@@ -2,7 +2,10 @@ import  axios, { AxiosInstance } from "axios";
 import { createContext, useContext, useEffect, useState } from "react";
 import { ReactNode } from "react";
 import { useHistory } from "react-router";
+import { toast, ToastContainer } from "react-toastify";
 import authAxios from "./custom-axios";
+import "react-toastify/dist/ReactToastify.min.css";
+
 export interface TelegramUser {
   id: number;
   first_name: string;
@@ -25,6 +28,15 @@ type AnonymousUser = {
 };
 
 type UserContext = LoggedInUser | AnonymousUser;
+
+const contextClass = {
+  success: "bg-blue-600",
+  error: "bg-red-600",
+  info: "bg-gray-600",
+  warning: "bg-orange-400",
+  default: "bg-indigo-600",
+  dark: "bg-white-600 font-gray-300",
+};
 
 type UserContextProperties =
   | (LoggedInUser & { refetchToken: () => void; logout: () => void; getAxiosWithToken:()=>AxiosInstance; })
@@ -81,7 +93,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     isAuthenticated: false,
   });
   const history = useHistory();
-  console.log("History", history);
   let providerValue: UserContextProperties;
   if (data.isAuthenticated) {
     providerValue = {
@@ -94,7 +105,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setData(loginStatus);
       },
       getAxiosWithToken:() => {
-        return authAxios(data.jwtToken);
+        return authAxios(data.jwtToken, (message)=>toast.error(message));
       }
     };
   } else {
@@ -111,7 +122,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     if (data.isAuthenticated) {
       const handle = setTimeout(() => {
         setData({ isAuthenticated: false });
-        alert("Timed out!");
       }, 20 * 60 * 1000);
       return () => {
         clearTimeout(handle);
@@ -121,6 +131,22 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   return (
     <AuthContext.Provider value={providerValue}>
       {children}
+      <ToastContainer
+        toastClassName={(context) =>
+          contextClass[context?.type || "default"] +
+          " relative flex p-1 min-h-10 rounded-md justify-between overflow-hidden cursor-pointer"
+        }
+        bodyClassName={() => "text-sm font-white font-med block p-3"}
+        position="bottom-center"
+        autoClose={10000}
+        hideProgressBar={true}
+        newestOnTop
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable={false}
+        pauseOnHover
+      />
     </AuthContext.Provider>
   );
 };

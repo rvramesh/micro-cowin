@@ -21,7 +21,6 @@ import { useApplicationContext } from "../context/ApplicationContext";
 import React, { useState } from "react";
 import SelectSearch, { SelectSearchOption } from "react-select-search";
 import { Redirect, useHistory } from "react-router";
-import axios from "axios";
 
 function Terms() {
   const {

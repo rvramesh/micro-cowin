@@ -15,7 +15,7 @@ function VaccinesPref({ parentName }: { parentName: string }) {
     clearErrors,
     control,
   } = useFormContext();
-  const vaxPreferredFieldName = `${parentName}.vaxPreferred`;
+  const vaxPreferredFieldName = `${parentName}.vaccinePreferences`;
 
   const res = useController({
     name: vaxPreferredFieldName,
@@ -30,15 +30,10 @@ function VaccinesPref({ parentName }: { parentName: string }) {
   });
   const vaxPreferredFieldValue :number[] = !res.field.value ? [] : res.field.value;
 
-  console.log("render", { vaxPreferredFieldValue });
-  //   const [selectedVax, changeSelectedVax] = useState<string[]>(
-  //     vaxPreferredFieldValue
-  //   );
 
   const addVax = (id: number) => {
     const newVal = [...vaxPreferredFieldValue, id];
     clearErrors(vaxPreferredFieldName);
-    console.log("addVax", { newVal });
     setValue(vaxPreferredFieldName, newVal, { shouldDirty: true });
   };
 
@@ -51,12 +46,9 @@ function VaccinesPref({ parentName }: { parentName: string }) {
         shouldFocus: true,
       });
     }
-    console.log("removeVax", { newVal });
-
+   
    res.field.onChange(newVal);
-    //changeSelectedVax(newVal);
   };
-  //console.log({ selectedVax });
   return (
     <>
       {" "}
@@ -83,7 +75,6 @@ function VaccinesPref({ parentName }: { parentName: string }) {
                 value={vaxId}
                 onBlur={res.field.onBlur}
                 onChange={(ev) => {
-                  console.log("onClick", ev.currentTarget.checked);
                   ev.currentTarget.checked ? addVax(vaxId) : removeVax(vaxId);
                 }}
                 checked={vaxPreferredFieldValue.includes(vaxId)}

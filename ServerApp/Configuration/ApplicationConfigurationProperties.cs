@@ -13,8 +13,8 @@ namespace MicroWin.Configuration
             this.OrganizingBodyFaqUrl = AppEnvironment.OrganizingBodyFaqUrl;
             this.SourceUrl = AppEnvironment.SourceUrl;
             this.IdentifierName = AppEnvironment.IdentifierName;
-            this.MinYear = AppEnvironment.MinYear;
-            this.MaxYear = AppEnvironment.MaxYear;
+            this.MaxYear = AppEnvironment.MinYear;
+            this.MinYear = AppEnvironment.MaxYear;
             this.Vaccines = vaccines;
             this.EnrollmentStatus = EnrollmentStatusMasterData.StatusMap;
             this.MaxEnrollmentPerUnit = 8;
