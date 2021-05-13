@@ -1,4 +1,4 @@
-import  { StrictMode, Suspense } from "react";
+import { StrictMode, Suspense } from "react";
 import ReactDOM from "react-dom";
 import "./assets/css/index.css";
 import App from "./App";
@@ -10,24 +10,26 @@ import myTheme from "./myTheme";
 import { QueryClient, QueryClientProvider } from "react-query";
 import { ApplicationProvider } from "./context/ApplicationContext";
 import { AuthProvider } from "./context/AuthenticationContext";
-
+import { BrowserRouter as Router } from "react-router-dom";
 const queryClient = new QueryClient();
 
 ReactDOM.render(
   <StrictMode>
-    <QueryClientProvider client={queryClient}>
-      <ApplicationProvider>
-        <AuthProvider>
-          <SidebarProvider>
-            <Suspense fallback={<ThemedSuspense />}>
-              <Windmill usePreferences={true} theme={myTheme}>
-                <App />
-              </Windmill>
-            </Suspense>
-          </SidebarProvider>
-        </AuthProvider>
-      </ApplicationProvider>
-    </QueryClientProvider>
+    <Router>
+      <QueryClientProvider client={queryClient}>
+        <ApplicationProvider>
+          <AuthProvider>
+            <SidebarProvider>
+              <Suspense fallback={<ThemedSuspense />}>
+                <Windmill usePreferences={true} theme={myTheme}>
+                  <App />
+                </Windmill>
+              </Suspense>
+            </SidebarProvider>
+          </AuthProvider>
+        </ApplicationProvider>
+      </QueryClientProvider>
+    </Router>
   </StrictMode>,
   document.getElementById("root")
 );

@@ -1,13 +1,20 @@
 import { ErrorMessage } from "@hookform/error-message";
 import { Label, Input, HelperText } from "@windmill/react-ui";
 import React from "react";
-import { useFormContext, get, DeepMap, FieldValues, FieldError } from "react-hook-form";
+import {
+  useFormContext,
+  get,
+  DeepMap,
+  FieldValues,
+  FieldError,
+} from "react-hook-form";
 import { useApplicationContext } from "../../../context/ApplicationContext";
 
 function YOBField({ parentName }: { parentName: string }) {
   const {
     register,
     formState: { errors },
+    getValues,
   } = useFormContext();
   const { minYear, maxYear } = useApplicationContext();
 
@@ -16,6 +23,7 @@ function YOBField({ parentName }: { parentName: string }) {
     errors,
     yobFieldName
   );
+  const initialValue = getValues(yobFieldName);
 
   const fieldProps = register(yobFieldName, {
     min: {
@@ -38,6 +46,7 @@ function YOBField({ parentName }: { parentName: string }) {
         type="number"
         maxLength={20}
         {...fieldProps}
+        defaultValue={initialValue}
       />
       <ErrorMessage
         errors={errors}

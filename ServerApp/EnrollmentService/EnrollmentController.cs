@@ -13,36 +13,70 @@ namespace MicroWin.EnrollmentService
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize(Roles="AcceptedTerms")]
-    public class EnrollmentController: Controller
+    [Authorize(Roles = "AcceptedTerms")]
+    public class EnrollmentController : Controller
     {
         private readonly EnrollmentRepo enrollmentRepo;
         private readonly ApplicationConfigurationRepo config;
 
-        public EnrollmentController(EnrollmentRepo enrollmentRepo, ApplicationConfigurationRepo config) {
+        public EnrollmentController(EnrollmentRepo enrollmentRepo, ApplicationConfigurationRepo config)
+        {
             this.enrollmentRepo = enrollmentRepo;
             this.config = config;
 
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<EnrollmentModel>>> GetAll(){
+        public async Task<ActionResult<IEnumerable<EnrollmentModel>>> GetAll()
+        {
             string id = base.User.Claims.SingleOrDefault(claim => claim.Type == JwtRegisteredClaimNames.Sub)?.Value;
             long telegramId;
-            if(long.TryParse(id, out telegramId))
+            if (long.TryParse(id, out telegramId))
             {
-               return await Task.FromResult(Ok(this.enrollmentRepo.GetByScheduler(telegramId)));
-            } else {
-                return BadRequest(new { success = false, type="Error", message = "Invalid Token" });
+                return await Task.FromResult(Ok(this.enrollmentRepo.GetByScheduler(telegramId)));
+            }
+            else
+            {
+                return BadRequest(new { success = false, type = "Error", message = "Invalid Token" });
+            }
+        }
+
+        [HttpGet("{id}")]
+        public async Task<ActionResult<IEnumerable<EnrollmentModel>>> Get(long id)
+        {
+            string userId = base.User.Claims.SingleOrDefault(claim => claim.Type == JwtRegisteredClaimNames.Sub)?.Value;
+            bool isAdmin = base.User.IsInRole("Admin");
+            long telegramId;
+            if (long.TryParse(userId, out telegramId))
+            {
+                var result = this.enrollmentRepo.Get(id);
+                if (result == null)
+                {
+                    return NotFound();
+                }
+                else if (result.ScheduledBy == telegramId || isAdmin)
+                {
+                    return await Task.FromResult(Ok(result));
+                }
+                else
+                {
+                    return await Task.FromResult(Unauthorized());
+                }
+            }
+            else
+            {
+                return BadRequest(new { success = false, type = "Error", message = "Invalid Token" });
             }
         }
 
         [HttpPost]
         public async Task<ActionResult<IEnumerable<int>>> Enroll(IEnumerable<EnrollmentRequest> persons)
         {
-            foreach(var person in persons){
-                if(person.VaccinePreferences.Length<1) {
-                    return BadRequest(new{success=false, type="Error", message = "All persons to be enrolled, should have atleast one vaccine in their preference"});
+            foreach (var person in persons)
+            {
+                if (person.VaccinePreferences.Length < 1)
+                {
+                    return BadRequest(new { success = false, type = "Error", message = "All persons to be enrolled, should have atleast one vaccine in their preference" });
                 }
             }
             string id = base.User.Claims.SingleOrDefault(claim => claim.Type == JwtRegisteredClaimNames.Sub)?.Value;
@@ -50,14 +84,15 @@ namespace MicroWin.EnrollmentService
             long telegramId;
             int currentlyEnrolled = this.enrollmentRepo.GetCountByUnit(unit);
             int maxEnrollment = config.Get().MaxEnrollmentPerUnit;
-            if((currentlyEnrolled+persons.Count())>maxEnrollment)
+            if ((currentlyEnrolled + persons.Count()) > maxEnrollment)
             {
-                return BadRequest(new {success = false, type = "Error", message = $"You have exceeded the max enrollment. You can enroll maximum of {maxEnrollment}"});
+                return BadRequest(new { success = false, type = "Error", message = $"You have exceeded the max enrollment. You can enroll maximum of {maxEnrollment}" });
             }
 
             if (long.TryParse(id, out telegramId))
             {
-               var entrollments = persons.Select(entry=>new EnrollmentModel(){
+                var entrollments = persons.Select(entry => new EnrollmentModel()
+                {
                     Name = entry.Name,
                     Yob = entry.Yob,
                     ScheduleFrom = entry.ScheduleFrom,
@@ -68,13 +103,13 @@ namespace MicroWin.EnrollmentService
                     LastUpdatedAt = DateTime.UtcNow,
                     LastUpdatedBy = telegramId,
                     VaccinesPreference = entry.VaccinePreferences.ToList()
-                       
+
                 });
-                return await Task.FromResult(Ok(this.enrollmentRepo.Enroll(unit, telegramId,entrollments)));
+                return await Task.FromResult(Ok(this.enrollmentRepo.Enroll(unit, telegramId, entrollments)));
             }
             else
             {
-                return BadRequest(new { success = false, type="Error", message = "Invalid Token" });
+                return BadRequest(new { success = false, type = "Error", message = "Invalid Token" });
             }
         }
 
@@ -82,32 +117,38 @@ namespace MicroWin.EnrollmentService
         public ActionResult<IEnumerable<int>> Withdraw(long id)
         {
             var enrollment = enrollmentRepo.Get(id);
-            if(enrollment == null ) {
+            if (enrollment == null)
+            {
                 return NotFound();
             }
-            if(enrollment.Status != EnrollmentStatus.Enrolled &&
-            enrollment.Status != EnrollmentStatus.Scheduled) {
-                return BadRequest(new {success=false, type="Error", message = "Cannot withdraw enrollment at current status."});
+            if (enrollment.Status != EnrollmentStatus.Enrolled &&
+            enrollment.Status != EnrollmentStatus.Scheduled)
+            {
+                return BadRequest(new { success = false, type = "Error", message = "Cannot withdraw enrollment at current status." });
             }
             string userId = base.User.Claims.SingleOrDefault(claim => claim.Type == JwtRegisteredClaimNames.Sub)?.Value;
             string unit = base.User.Claims.SingleOrDefault(claim => claim.Type == ClaimTypes.UserData)?.Value;
             long telegramId;
             if (long.TryParse(userId, out telegramId))
             {
-                if(telegramId == enrollment.ScheduledBy) {
-                enrollment.Status = EnrollmentStatus.Withdrawn;
-                enrollmentRepo.UpdateEnrollment(unit, telegramId,enrollment);
-                return Ok();
+                if (telegramId == enrollment.ScheduledBy)
+                {
+                    enrollment.Status = EnrollmentStatus.Withdrawn;
+                    enrollmentRepo.UpdateEnrollment(unit, telegramId, enrollment);
+                    return Ok();
                 }
-                else {
+                else
+                {
                     return BadRequest(new { success = false, type = "Error", message = "Not Authorized" });
                 }
-            } else {
-                return BadRequest(new { success = false, type="Error", message = "Invalid Token" });
+            }
+            else
+            {
+                return BadRequest(new { success = false, type = "Error", message = "Invalid Token" });
             }
         }
 
-        [HttpPost("/{id}")]
+        [HttpPost("{id}")]
         public async Task<ActionResult<IEnumerable<int>>> Update(long id, EnrollmentRequest request)
         {
             if (request.VaccinePreferences.Length < 1)
@@ -115,14 +156,15 @@ namespace MicroWin.EnrollmentService
                 return BadRequest(new { success = false, type = "Error", message = "Please select atleast one vaccine." });
             }
             var enrollment = this.enrollmentRepo.Get(id);
-            if(enrollment ==null)
+            if (enrollment == null)
             {
                 return NotFound();
             }
-            if(enrollment.Status != EnrollmentStatus.Enrolled || enrollment.Status != EnrollmentStatus.Scheduled){
-                return BadRequest(new {success = false, type = "Error", message = "Only records with status Enrolled can be updated."});
+            if (enrollment.Status != EnrollmentStatus.Enrolled && enrollment.Status != EnrollmentStatus.Scheduled)
+            {
+                return BadRequest(new { success = false, type = "Error", message = "Only records with status Enrolled can be updated." });
             }
-            
+
             string userId = base.User.Claims.SingleOrDefault(claim => claim.Type == JwtRegisteredClaimNames.Sub)?.Value;
             string unit = base.User.Claims.SingleOrDefault(claim => claim.Type == ClaimTypes.UserData)?.Value;
             long telegramId;
@@ -138,7 +180,7 @@ namespace MicroWin.EnrollmentService
             }
             else
             {
-                return BadRequest(new { success = false, type="Error", message = "Invalid Token" });
+                return BadRequest(new { success = false, type = "Error", message = "Invalid Token" });
             }
         }
     }

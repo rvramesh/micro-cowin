@@ -2,7 +2,7 @@ interface Person
 {
     name:string;
     yob:number;
-    scheduleFrom:number;
+    scheduleFrom:string;
     vaccinePreferences:number[];
 };
 

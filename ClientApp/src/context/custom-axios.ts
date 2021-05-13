@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const customAxios = (token:string, onError:(message:string)=>void) => {
+const customAxios = (token:string, onError:(code:"400"|"401"|"404",message:string)=>void) => {
   // axios instance for making requests
   const axiosInstance = axios.create();
 
@@ -14,13 +14,17 @@ const customAxios = (token:string, onError:(message:string)=>void) => {
   // response interceptor for adding token
   axiosInstance.interceptors.response.use(undefined, (error)=>{
      if (!error.response) {
-       onError("NETWORK ERROR");
+       onError("400", "Network Error! Please check your internet connection and try again.");
      } else {
        const code = error.response.status;
        if (code === 400 && error.response.data.type==="Error" && error.response.data.message) {
-         onError(error.response.data.message)
+         onError("400", error.response.data.message)
        } else if (code === 400 && error.response.data.title) {
-         onError(error.response.data.title);
+         onError("400", error.response.data.title);
+       } else if(code === 401) {
+         onError("401", "Not Authorized");
+       } else if(code === 404) {
+         onError("404", "Not Found");
        }
      }
      return Promise.reject(error);

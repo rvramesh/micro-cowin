@@ -8,9 +8,11 @@ const Buttons = lazy(() => import('../pages/Buttons'))
 const Modals = lazy(() => import('../pages/Modals'))
 const Tables = lazy(() => import('../pages/Tables'))
 const Page404 = lazy(() => import('../pages/404'))
+const Page401 = lazy(() => import("../pages/401"));
+
 const Blank = lazy(() => import('../pages/Blank'))
 const Enrollment = lazy(()=>import("../pages/enrollment/Enrollment"));
-const Terms = lazy(() => import("../pages/Terms"));
+const EditEnrollment = lazy(() => import("../pages/enrollment/EditEnrollment"));
 /**
  * ⚠ These are internal routes!
  * They will be rendered inside the app, using the default `containers/Layout`.
@@ -23,41 +25,49 @@ const Terms = lazy(() => import("../pages/Terms"));
  */
 const routes = [
   {
-    path: '/enrollment', // the url
+    path: "/enrollment", // the url
     component: Enrollment, // view rendered
   },
   {
-    path: '/dashboard', // the url
+    path: "/enrollment/:id",
+    component: EditEnrollment,
+  },
+  {
+    path: "/dashboard", // the url
     component: Dashboard, // view rendered
   },
   {
-    path: '/forms',
+    path: "/forms",
     component: Forms,
   },
   {
-    path: '/cards',
+    path: "/cards",
     component: Cards,
   },
   {
-    path: '/buttons',
+    path: "/buttons",
     component: Buttons,
   },
   {
-    path: '/modals',
+    path: "/modals",
     component: Modals,
   },
   {
-    path: '/tables',
+    path: "/tables",
     component: Tables,
   },
   {
-    path: '/404',
+    path: "/notfound",
     component: Page404,
   },
   {
-    path: '/blank',
+    path: "/unauthorized",
+    component: Page401,
+  },
+  {
+    path: "/blank",
     component: Blank,
-  }
-]
+  },
+];
 
 export default routes

@@ -4,14 +4,14 @@ import React, { useState } from "react";
 import { useFormContext, get } from "react-hook-form";
 
 function ScheduleDate({ parentName }: { parentName: string }) {
-  const [todaysDate] = useState(() => new Date().toISOString().split("T")[0]);
   const {
     register,
     formState: { errors },
+    getValues,
   } = useFormContext();
   const dateOnwardsFieldName = `${parentName}.scheduleFrom`;
   const dateOnwardsFieldError = get(errors, dateOnwardsFieldName);
-
+  const initialValue = (getValues(dateOnwardsFieldName) || new Date().toISOString()).split("T")[0];
   return (
     <Label>
       <span className="text-lg text-gray-700 dark:text-gray-500">
@@ -20,14 +20,13 @@ function ScheduleDate({ parentName }: { parentName: string }) {
       <Input
         valid={dateOnwardsFieldError !== undefined ? false : undefined}
         type="date"
-        //  value={todaysDate}
-        defaultValue={todaysDate}
-        min={todaysDate}
+        defaultValue={initialValue}
+        min={initialValue}
         maxLength={20}
         {...register(dateOnwardsFieldName, {
           min: {
-            value: todaysDate,
-            message: `Preferred Vaccination date should be above ${todaysDate}`,
+            value: initialValue,
+            message: `Preferred Vaccination date should be above ${initialValue}`,
           },
           required: {
             value: true,

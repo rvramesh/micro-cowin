@@ -1,6 +1,7 @@
 import { Button, Label } from "@windmill/react-ui";
 import classNames from "classnames";
 import React from "react";
+import { useHistory } from "react-router";
 import { useApplicationContext } from "../../../context/ApplicationContext";
 import { ArrowCircleDown } from "../../../icons";
 import { EnrollmentResponse } from "../types/Person";
@@ -22,6 +23,8 @@ function PersonCard({
 }) {
   const { enrollmentStatus, vaccines, identifierName } =
     useApplicationContext();
+    const history = useHistory();
+    const gotoEditEnrollment = (id:number)=>history.push(`/app/enrollment/${id}`)
   return (
     <div
       className={classNames(
@@ -49,10 +52,8 @@ function PersonCard({
       </div>
 
       <div
-        className={classNames(
-          " relative transition-all overflow-hidden "
-        )}
-        style={isExpanded?{maxHeight:"600px"}:{maxHeight:"0px"}}
+        className={classNames(" relative transition-all overflow-hidden ")}
+        style={isExpanded ? { maxHeight: "600px" } : { maxHeight: "0px" }}
       >
         <div className="p-4 text-lg text-gray-700 dark:text-gray-500 flex flex-col justify-start flex-wrap md:flex-row">
           <div className="w-full md:w-1/4 p-1">
@@ -87,6 +88,7 @@ function PersonCard({
         {(data.status === "E" || data.status === "S") && (
           <div className="p-4 pt-0">
             <Button onClick={() => onWithdraw(data.id)}>Withdraw</Button>
+            <Button onClick={() => gotoEditEnrollment(data.id)}>Edit</Button>
           </div>
         )}
       </div>

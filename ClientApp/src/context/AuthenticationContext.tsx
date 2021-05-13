@@ -1,4 +1,4 @@
-import  axios, { AxiosInstance } from "axios";
+import axios, { AxiosInstance } from "axios";
 import { createContext, useContext, useEffect, useState } from "react";
 import { ReactNode } from "react";
 import { useHistory } from "react-router";
@@ -39,7 +39,11 @@ const contextClass = {
 };
 
 type UserContextProperties =
-  | (LoggedInUser & { refetchToken: () => void; logout: () => void; getAxiosWithToken:()=>AxiosInstance; })
+  | (LoggedInUser & {
+      refetchToken: () => void;
+      logout: () => void;
+      getAxiosWithToken: () => AxiosInstance;
+    })
   | (AnonymousUser & { login: (loginDetails: TelegramUser) => void });
 
 const getAuthorizedUserToken = async (loginDetails: TelegramUser) => {
@@ -50,7 +54,6 @@ const getAuthorizedUserToken = async (loginDetails: TelegramUser) => {
   }>("/api/authorization/user/getToken", loginDetails);
   return data;
 };
-
 
 const getUserContextData = async (
   loginDetails: TelegramUser
@@ -87,12 +90,24 @@ export const useAuthenticatedContext = () => {
   }
 };
 
-
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [data, setData] = useState<UserContext>({
     isAuthenticated: false,
   });
   const history = useHistory();
+  const handleAxiosErrors = (code: "400" | "401" | "404", message: string) => {
+    switch (code) {
+      case "400":
+        toast.error(message);
+        break;
+      case "401":
+        history.push("/app/unauthorized");
+        break;
+      case "404":
+        history.push("/app/notfound");
+        break;
+    }
+  };
   let providerValue: UserContextProperties;
   if (data.isAuthenticated) {
     providerValue = {
@@ -104,9 +119,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         var loginStatus = await getUserContextData(data);
         setData(loginStatus);
       },
-      getAxiosWithToken:() => {
-        return authAxios(data.jwtToken, (message)=>toast.error(message));
-      }
+      getAxiosWithToken: () => {
+        return authAxios(data.jwtToken, handleAxiosErrors);
+      },
     };
   } else {
     providerValue = {

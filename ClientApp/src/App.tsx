@@ -1,7 +1,6 @@
 import { lazy } from "react";
 import {
-  BrowserRouter as Router,
-  Switch,
+    Switch,
   Route,
   Redirect,
 } from "react-router-dom";
@@ -17,37 +16,25 @@ function App() {
   const { isAuthenticated } = useAuthContext();
   return (
     <>
-      <Router>
-        <AccessibleNavigationAnnouncer />
-        <div className="flex h-screen bg-gray-50 dark:bg-gray-900 false w-full">
-          <div className="flex flex-col flex-1 w-full">
-            <Header />
-            
-                    <Switch>
-                      <Route exact path="/login" component={Login} />
-                      <Route
-                        exact
-                        path="/sessiontimeout"
-                        component={SessionTimeout}
-                      />
-                      <Route
-                        path="/app"
-                        render={() =>
-                          isAuthenticated ? (
-                            <Layout />
-                          ) : (
-                            <Redirect to="/sessiontimeout" />
-                          )
-                        }
-                      />
-                      <Redirect exact from="/" to="/login" />
-                      <Route component={Page404} />
-                    </Switch>
-                
-            
-          </div>
+      <AccessibleNavigationAnnouncer />
+      <div className="flex h-screen bg-gray-50 dark:bg-gray-900 false w-full">
+        <div className="flex flex-col flex-1 w-full">
+          <Header />
+
+          <Switch>
+            <Route exact path="/login" component={Login} />
+            <Route exact path="/sessiontimeout" component={SessionTimeout} />
+            <Route
+              path="/app"
+              render={() =>
+                isAuthenticated ? <Layout /> : <Redirect to="/sessiontimeout" />
+              }
+            />
+            <Redirect exact from="/" to="/login" />
+            <Route component={Page404} />
+          </Switch>
         </div>
-      </Router>
+      </div>
     </>
   );
 }

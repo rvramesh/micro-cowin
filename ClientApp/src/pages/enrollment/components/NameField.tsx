@@ -7,9 +7,11 @@ function NameField({ parentName }: { parentName: string }) {
   const {
     register,
     formState: { errors },
+    getValues
   } = useFormContext();
   const initialsFieldName = `${parentName}.name`;
   const initialsError = get(errors, initialsFieldName);
+  const initialValue = getValues(initialsFieldName);
   return (
     <Label>
       <span className="text-lg text-gray-700 dark:text-gray-500">
@@ -23,6 +25,7 @@ function NameField({ parentName }: { parentName: string }) {
           maxLength: 20,
           required: { value: true, message: "Name is required" },
         })}
+        defaultValue={initialValue}
       />
       <ErrorMessage
         errors={errors}
