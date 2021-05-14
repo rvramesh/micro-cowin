@@ -5,16 +5,11 @@ import { EnrollmentRequest, EnrollmentResponse } from "./types/Person";
 import { useMutation, useQuery } from "react-query";
 import { useHistory, useParams } from "react-router";
 import EditEnrollmentForm from "./components/EditEnrollmentForm";
-import { AxiosError } from "axios";
 
 function EditEnrollment() {
   const history = useHistory();
-  const {
-    first_name: firstName,
-    getAxiosWithToken,
-    id: currentUserId,
-    isAdmin,
-  } = useAuthenticatedContext();
+  const { first_name: firstName, getAxiosWithToken } =
+    useAuthenticatedContext();
   const { id } = useParams<{ id: string }>();
 
   const gotoEnrollments = () => history.push("/app/enrollment");
@@ -37,21 +32,14 @@ function EditEnrollment() {
     data: EnrollmentRequest;
   }) => getAxiosWithToken().post(`/api/enrollment/${id}`, data.persons[0]);
 
-  const { data, isLoading, isError, error } = useQuery<
-    EnrollmentResponse,
-    AxiosError
-  >(`enrollment-${id}`, fetchEnrollmentsApi, {
-    retry: false,
-    staleTime: 0, //30 MINS IN MS,
-  });
-
+  const { data, isLoading, isError } = useQuery<EnrollmentResponse>(
+    `enrollment-${id}`,
+    fetchEnrollmentsApi
+  );
 
   const { mutate: editEnrollment } = useMutation(
     "enrollments-withdraw",
-    editEnrollmentApi,
-    {
-      retry: false,
-    }
+    editEnrollmentApi
   );
 
   const onSubmit = (data: EnrollmentRequest) => {

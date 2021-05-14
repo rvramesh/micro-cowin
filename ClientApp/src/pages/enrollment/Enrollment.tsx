@@ -26,27 +26,17 @@ function Enrollment() {
 
   const { data, isLoading, isError, refetch } = useQuery(
     "enrollments",
-    fetchEnrollmentsApi,
-    {
-      retry: false,
-      staleTime: 1000 * 60 * 30, //30 MINS IN MS,
-    }
+    fetchEnrollmentsApi
   );
 
   const { mutate: addEnrollments } = useMutation(
     "enrollments-addition",
-    addEnrollmentApi,
-    {
-      retry: false,
-    }
+    addEnrollmentApi
   );
 
   const { mutate: withDrawEnrollment } = useMutation(
     "enrollments-withdraw",
-    withdrawEnrollmentApi,
-    {
-      retry: false,
-    }
+    withdrawEnrollmentApi
   );
 
   const onSubmit = (data: EnrollmentRequest, onSuccess:()=>void) => {

@@ -47,7 +47,7 @@ function PersonCard({
             "rotate-180": isExpanded,
           })}
         >
-          <ArrowCircleDown />
+          {/* <ArrowCircleDown /> */}
         </div>
       </div>
 
@@ -86,9 +86,9 @@ function PersonCard({
           </div>
         </div>
         {(data.status === "E" || data.status === "S") && (
-          <div className="p-4 pt-0">
-            <Button onClick={() => onWithdraw(data.id)}>Withdraw</Button>
-            <Button onClick={() => gotoEditEnrollment(data.id)}>Edit</Button>
+          <div className="p-4 pt-0 flex justify-between md:justify-start">
+            <Button className="mr-2 w-32" onClick={() => onWithdraw(data.id)}>Withdraw</Button>
+            <Button className="mr-2 w-32" onClick={() => gotoEditEnrollment(data.id)}>Edit</Button>
           </div>
         )}
       </div>

@@ -64,15 +64,17 @@ function EnrollmentForm({
           >
             Add Additional Member
           </Button>
-          <Button
-            disabled={fields.length === 0}
-            onClick={formMethods.handleSubmit<EnrollmentRequest>(
-              (data) => onSubmit(data, () => formMethods.reset()),
-              (error) => console.log(error)
-            )}
-          >
-            Enroll {fields.length} Person{fields.length > 1 ? "s" : ""}
-          </Button>
+          {fields.length > 0 && (
+            <Button
+              disabled={fields.length === 0}
+              onClick={formMethods.handleSubmit<EnrollmentRequest>(
+                (data) => onSubmit(data, () => formMethods.reset()),
+                (error) => console.log(error)
+              )}
+            >
+              Enroll {fields.length} Person{fields.length > 1 ? "s" : ""}
+            </Button>
+          )}
         </div>
       </FormProvider>
     </form>
