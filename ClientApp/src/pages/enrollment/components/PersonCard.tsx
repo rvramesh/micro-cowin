@@ -1,9 +1,8 @@
-import { Button, Label } from "@windmill/react-ui";
+import { Button } from "@windmill/react-ui";
 import classNames from "classnames";
-import React from "react";
 import { useHistory } from "react-router";
 import { useApplicationContext } from "../../../context/ApplicationContext";
-import { ArrowCircleDown } from "../../../icons";
+//import { ArrowCircleDown } from "../../../icons";
 import { EnrollmentResponse } from "../types/Person";
 
 function PersonCard({
