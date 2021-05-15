@@ -33,7 +33,7 @@ namespace MicroWin.Common.Database
         {
             using var connection = connectionFactory.CreateConnection();
 
-            var path = Path.Combine(env.ContentRootPath, "ServerApp","App_Data", "Scripts");
+            var path = Path.Combine(env.ContentRootPath, "App_Data", "Scripts");
 
             IEnumerable<string> executedScripts = new string[0];
             // check if the migrations table exists, otherwise execute the first script (which creates that table) 

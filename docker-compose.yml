@@ -3,15 +3,24 @@
 version: '3.4'
 
 services:
+  clientapp:
+    image: clientapp
+    build:
+      context: ClientApp
+      dockerfile: ./Dockerfile
+    environment:
+      NODE_ENV: production
+    ports:
+      - 3000:3000
   microwin:
-    image: microwin
+    image: micro-cowin
     env_file: 
-      - .env
+      - ./ServerApp/.env
     build:
       context: .
-      dockerfile: ./Dockerfile
+      dockerfile: ./ServerApp/Dockerfile
     ports:
-      - 80:5000
+      - 5000
     volumes:
       - dbdata:/data
     

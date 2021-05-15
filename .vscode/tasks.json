@@ -7,7 +7,7 @@
             "type": "process",
             "args": [
                 "build",
-                "${workspaceFolder}/micro-win.csproj",
+                "${workspaceFolder}/ServerApp/micro-win.csproj",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:NoSummary"
             ],
@@ -19,7 +19,7 @@
             "type": "process",
             "args": [
                 "publish",
-                "${workspaceFolder}/micro-win.csproj",
+                "${workspaceFolder}/ServerApp/micro-win.csproj",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:NoSummary"
             ],
@@ -32,7 +32,7 @@
             "args": [
                 "watch",
                 "run",
-                "${workspaceFolder}/micro-win.csproj",
+                "${workspaceFolder}/ServerApp/micro-win.csproj",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:NoSummary"
             ],
@@ -45,14 +45,14 @@
                 "build"
             ],
             "dockerBuild": {
-                "tag": "microwin:dev",
+                "tag": "microcowin:dev",
                 "target": "base",
-                "dockerfile": "${workspaceFolder}/Dockerfile",
+                "dockerfile": "${workspaceFolder}/ServerApp/Dockerfile.local",
                 "context": "${workspaceFolder}",
                 "pull": true
             },
             "netCore": {
-                "appProject": "${workspaceFolder}/micro-win.csproj"
+                "appProject": "${workspaceFolder}/ServerApp/micro-win.csproj"
             }
         },
         {
@@ -62,40 +62,29 @@
                 "build"
             ],
             "dockerBuild": {
-                "tag": "microwin:latest",
-                "dockerfile": "${workspaceFolder}/Dockerfile",
+                "tag": "microcowin:latest",
+                "dockerfile": "${workspaceFolder}/ServerApp/Dockerfile",
                 "context": "${workspaceFolder}",
                 "pull": true
             },
             "netCore": {
-                "appProject": "${workspaceFolder}/micro-win.csproj"
+                "appProject": "${workspaceFolder}/ServerApp/micro-win.csproj"
             }
         },
         {
             "type": "docker-run",
             "label": "docker-run: debug",
             "dependsOn": [
-                "docker-build: debug"
+                "docker-build"
             ],
             "dockerRun": {
                 "env": {
-                    "ASPNETCORE_ENVIRONMENT": "Development",
-                    "DOTNET_USE_POLLING_FILE_WATCHER":"true",
-                },
-                "volumes": [{
-                   
-                    "containerPath": "/home/appuser/.aspnet/https",
-                    "localPath": "/home/rvram/.aspnet/https",
-                    "permissions": "ro"
-                }],
-                "ports": [{
-                    "containerPort": 5000,
-                    "hostPort": 80,
-                    "protocol": "tcp"
-                }]
+                    "DEBUG": "*",
+                    "NODE_ENV": "development"
+                }
             },
-            "netCore": {
-                "appProject": "${workspaceFolder}/micro-win.csproj",
+            "node": {
+                "package": "${workspaceFolder}/ClientApp/package.json",
                 "enableDebugging": true
             }
         },
@@ -103,11 +92,24 @@
             "type": "docker-run",
             "label": "docker-run: release",
             "dependsOn": [
-                "docker-build: release"
+                "docker-build"
             ],
-            "dockerRun": {},
-            "netCore": {
-                "appProject": "${workspaceFolder}/micro-win.csproj"
+            "platform": "node",
+            "node": {
+                "package": "${workspaceFolder}/ClientApp/package.json"
+            }
+        },
+        {
+            "type": "docker-build",
+            "label": "docker-build",
+            "platform": "node",
+            "dockerBuild": {
+                "dockerfile": "${workspaceFolder}/ClientApp/Dockerfile",
+                "context": "${workspaceFolder}/ClientApp",
+                "pull": true
+            },
+            "node": {
+                "package": "${workspaceFolder}/ClientApp/package.json"
             }
         }
     ]

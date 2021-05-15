@@ -1,17 +1,14 @@
-# Please refer https://aka.ms/HTTPSinContainer on how to setup an https developer certificate for your ASP .NET Core service.
-
 version: '3.4'
 
 services:
-  microwin:
-    image: microwin
+  clientapp:
+    image: clientapp
     build:
-      context: .
-      dockerfile: ./DockerDebugfile
-    ports:
-      - 5000
+      context: ClientApp
+      dockerfile: ./Dockerfile
     environment:
-      - ASPNETCORE_ENVIRONMENT=Development
-      - NODE_ENV=Development
-    volumes:
-      - ~/.vsdbg:/remote_debugger:rw
+      NODE_ENV: development
+    ports:
+      - 3000:3000
+      - 9229:9229
+    command: ["node", "--inspect=0.0.0.0:9229", "index.js"]
